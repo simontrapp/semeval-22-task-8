@@ -1,0 +1,60 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pnlp-train-end2end-02
+  namespace: studwangsadirdja
+spec:
+  template:
+    spec:
+      priorityClassName: research-low
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values:
+                      - ancalagon
+      containers:
+        - name: custom-container-name
+          image: ls6-stud-registry.informatik.uni-wuerzburg.de/studwangsadirdja-project-nlp:0.0.1
+          imagePullPolicy: "Always"
+          workingDir: /home/stud/wangsadirdja
+          env:
+            - name: PYTHONHASHSEED
+              value: "0"
+            - name: PYTORCH_TRANSFORMERS_CACHE
+              value: "/home/stud/wangsadirdja/pyfarmbert/cache"
+            - name: MYDIR # example usage of env variable
+              value: "/home/stud/wangsadirdja/"
+          resources:
+            limits:
+              nvidia.com/gpu: "2"
+              cpu: "20"
+              memory: "32Gi"
+          command: ["bash", "-c", "cd /home/stud/wangsadirdja/project-nlp && python3 -u train.py"]
+                        #/home/stud/wangsadirdja/newtagger/input/gtb000_all/
+                        #/home/stud/wangsadirdja/newtagger/output/gtb000_kern000_nodev_seed42_01/
+                        #-t direct -f tsv -gpu -m test -cfile test01.txt"] 
+                        #--targetdir /home/stud/wangsadirdja/newtagger/data/riqua/000/
+                        #--resfolder /home/stud/wangsadirdja/newtagger/models/direct_bert_riq000/"]
+          #command: ["python", "-u", "/home/stud/wangsadirdja/fastbert/train_lm.py"]
+          #command: ["sleep", "10000000"]
+          volumeMounts:
+            - mountPath: /home/stud/wangsadirdja # directory IN the container
+              name: localdir # matches volume-name from below
+      imagePullSecrets:
+        - name: lsx-registry
+      restartPolicy: "Never"
+      #nodeSelector: 
+        #kubernetes.io/hostname: varda
+      volumes:
+        - name: localdir
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20  # Not important for you, just copy along
+            user: studwangsadirdja  # <username>
+            path: "/home/stud/wangsadirdja" # <full path to dir in CEPH>
+            secretRef: # The name of the secret for auth. Is always "ceph-secret"
+              name: ceph-secret

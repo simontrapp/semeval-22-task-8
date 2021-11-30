@@ -1,0 +1,13 @@
+# Folders
+/data/raw/
+/data/processed/train/
+/data/processed/test/
+/models/
+/venv/
+/.idea/
+
+# Files
+
+
+# Exceptions
+!/models/README.md
