@@ -2,7 +2,7 @@
 
 ## Get Started
 
-1. Unpack `training_data.zip` in `/data/processed`.
+1. Unpack `training_data.zip` in `/data/processed` and rename unzipped folder to `train`.
 2. Install `requirements.txt` with `pip`.
 3. Go to `/scripts/end_to_end_bert/` and run `train.py`.
 
