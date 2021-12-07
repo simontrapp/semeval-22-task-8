@@ -1,5 +1,9 @@
 sentence-transformers
-torch
 pandas
 matplotlib
 seaborn
+nltk
+numpy
+scikit-learn
+gensim
+joblib
