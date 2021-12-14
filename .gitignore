@@ -1,5 +1,6 @@
 # Folders
 /data/raw/
+/data/embeddings
 /data/processed/train/
 /data/processed/test/
 /data/processed
