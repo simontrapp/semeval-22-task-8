@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nlpprak-text-cnn
+  namespace: studheinickel
+spec:
+  template:
+    spec:
+      priorityClassName: research-low
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+                - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values:
+                      - ancalagon
+      containers:
+        - name: text-cnn
+          image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/text-cnn:0.0.1
+          imagePullPolicy: "Always"
+          resources:
+            limits:
+              nvidia.com/gpu: "2"
+              cpu: "10"
+              memory: "32Gi"
+          command: ["bash", "-c", "cd /home/stud/heinickel/scripts/text_cnn/ && python3 preprocess.py && python3 train.py"]
+          volumeMounts:
+            - mountPath: /home/stud/heinickel/models # directory IN the container
+              name: localdir # matches volume-name from below
+      imagePullSecrets:
+        - name: lsx-registry
+      restartPolicy: "Never"
+      volumes:
+        - name: localdir
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20  # Not important for you, just copy along
+            user: studheinickel  # <username>
+            path: "/home/stud/heinickel/mlnlp/models" # <full path to dir in CEPH>
+            secretRef: # The name of the secret for auth. Is always "ceph-secret"
+              name: ceph-secret
