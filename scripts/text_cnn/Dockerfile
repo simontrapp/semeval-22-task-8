@@ -2,10 +2,11 @@ FROM nvidia/cuda:11.3.1-cudnn8-devel-ubuntu20.04
 
 # config
 ARG USER=heinickel
-ARG UID=1309
+ARG UID=1308
 
 RUN mkdir -p /home/stud/${USER}/scripts/textCNN
 RUN mkdir -p /home/stud/${USER}/models
+RUN mkdir -p /home/stud/${USER}/logs
 RUN adduser stud${USER} --uid ${UID} --home /home/stud/${USER}/ --disabled-password --gecos "" --no-create-home
 
 # Build from project root!
