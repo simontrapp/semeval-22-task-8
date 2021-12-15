@@ -7,14 +7,22 @@ spec:
   template:
     spec:
       priorityClassName: research-low
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+                - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values:
+                      - ancalagon
       containers:
         - name: bert-sdr
           image: ls6-stud-registry.informatik.uni-wuerzburg.de/studtrapp/bert-sdr:0.0.1
           imagePullPolicy: "Always"
           resources:
             limits:
-              nvidia.com/gpu: "2"
-              cpu: "10"
+              cpu: "16"
               memory: "32Gi"
           command: ["bash", "-c", "cd /home/stud/trapp/scripts/bert_sdr/ && python3 calculate_article_similarity.py && python3 train_classifier.py"]
           volumeMounts:

@@ -13,13 +13,14 @@ set -e
 
 export BUILDAH_FORMAT="docker"
 export NAME="ls6-stud-registry.informatik.uni-wuerzburg.de/studtrapp/bert-sdr:0.0.1"
+alias buildah='buildah --runroot /tmp/$USER/.local/share/containers/runroot --root /tmp/$USER/.local/share/containers/storage/'
 
 echo "Building the container..."
-fastbuildah bud -t ${NAME} -f scripts/bert_sdr/Dockerfile .
+buildah bud -t ${NAME} -f scripts/bert_sdr/Dockerfile .
 echo "Login to container registry. Username: stud, Password: studregistry."
-fastbuildah login ls6-stud-registry.informatik.uni-wuerzburg.de   # with username `stud` and password `studregistry`
+buildah login ls6-stud-registry.informatik.uni-wuerzburg.de   # with username `stud` and password `studregistry`
 echo "Pushing container to registry..."
-fastbuildah push ${NAME}
+buildah push ${NAME}
 
 # RUN ONCE: kubectl -n studtrapp create secret generic lsx-registry --from-file=.dockerconfigjson=${XDG_RUNTIME_DIR}/containers/auth.json --type=kubernetes.io/dockerconfigjson
 

@@ -1,4 +1,5 @@
 import pandas
+import util
 from calculate_article_similarity import OUTPUT_CSV_PATH
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
@@ -18,8 +19,8 @@ def load_training_data(training_data_path: str, knn_imputer: bool = False):
     else:
         imputer = SimpleImputer(strategy='constant', fill_value=0.0)
     training_data = pandas.DataFrame(imputer.fit_transform(training_data), columns=training_data.columns)
-    x = training_data[['sentence_similarity_2_to_1', 'sentence_similarity_1_to_2', 'keyword_similarity_2_to_1', 'keyword_similarity_1_to_2']]
-    y = training_data['overall_score']
+    x = training_data[[util.DATA_BERT_SIM_21, util.DATA_BERT_SIM_12, util.DATA_USE_SIM_21, util.DATA_USE_SIM_12]]
+    y = training_data[util.DATA_OVERALL_SCORE]
     return x, y
 
 
@@ -53,9 +54,10 @@ def train_random_forest(training_data_path: str, model_path: str, knn_imputer: b
         random_forest.fit(x_train, y_train)
         # evaluation
         y_predictions = random_forest.predict(x_test)
-        print("Mean squared error:", metrics.mean_squared_error(y_test, y_predictions))
-        print("Mean absolute error:", metrics.mean_absolute_error(y_test, y_predictions))
-        print("Pearson correlation coefficient (r, p-value):", pearsonr(y_test, y_predictions))
+        with open(f"{model_path}.txt", 'w') as file:
+            file.write(f"Mean squared error: {metrics.mean_squared_error(y_test, y_predictions)}\n"
+                       f"Mean absolute error: {metrics.mean_absolute_error(y_test, y_predictions)}\n"
+                       f"Pearson correlation coefficient (r, p-value): {pearsonr(y_test, y_predictions)}")
         plot_model(y_test, y_predictions, f"{model_path}.pdf")
     else:
         random_forest.fit(x, y)
@@ -66,6 +68,6 @@ def train_random_forest(training_data_path: str, model_path: str, knn_imputer: b
 
 if __name__ == "__main__":
     train_random_forest(OUTPUT_CSV_PATH, '../../models/random_forest_kw_zero.joblib', False, True)
-    # train_random_forest(OUTPUT_CSV_PATH, '../../models/random_forest_kw_knn.joblib', True, True)
+    train_random_forest(OUTPUT_CSV_PATH, '../../models/random_forest_kw_knn.joblib', True, True)
     train_random_forest(OUTPUT_CSV_PATH, '../../models/random_forest_no_test_kw_zero.joblib', False, False)
-    # train_random_forest(OUTPUT_CSV_PATH, '../../models/random_forest_no_test_kw_knn.joblib', True, False)
+    train_random_forest(OUTPUT_CSV_PATH, '../../models/random_forest_no_test_kw_knn.joblib', True, False)
