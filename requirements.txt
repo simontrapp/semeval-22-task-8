@@ -5,6 +5,8 @@ seaborn
 nltk
 numpy
 scikit-learn
-gensim
 joblib
 scipy
+tensorflow
+tensorflow-hub
+tensorflow_text
