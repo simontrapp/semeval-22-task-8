@@ -10,3 +10,6 @@ scipy
 tensorflow
 tensorflow-hub
 tensorflow_text
+
+pytorch-lightning
+tensorboard

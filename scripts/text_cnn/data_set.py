@@ -1,25 +1,20 @@
 from torch.utils.data import Dataset
 import torch
 
+
 class SentenceDataset(Dataset):
 
-    def __init__(self, sentences, label, model):
-        self.sentences = sentences
+    def __init__(self, sentences_1, sentences_2, label):
+        self.sentences_1 = sentences_1
+        self.sentences_2 = sentences_2
         self.labels = label
-        self.len = len(sentences)
-        self.model = model
+        self.len = len(sentences_1)
 
     def __len__(self):
         return self.len
 
     def __getitem__(self, idx):
-        x = torch.Tensor(self.sentences[idx])
-        y = torch.Tensor(self.labels[idx])
-        # try:
-        #   if x.size()[1]<3:
-        #     print(x.size)
-        #     print(self.sentences[idx])
-        # except:
-        #   print(self.sentences[idx])
-        # print(x.size())
-        return x.resize(1,*x.size()),y
+        s1 = self.sentences_1[idx]
+        s2 = self.sentences_2[idx]
+        label = self.labels[idx]
+        return torch.tensor([s1, s2]), torch.Tensor(label).float()

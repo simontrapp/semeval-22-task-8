@@ -22,9 +22,10 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 ADD data /home/stud/${USER}/data
 COPY scripts/textCNN/util.py /home/stud/${USER}/scripts/textCNN/
 COPY scripts/textCNN/preprocess.py /home/stud/${USER}/scripts/textCNN/
-COPY scripts/textCNN/cnn.py /home/stud/${USER}/scripts/textCNN/
+COPY scripts/textCNN/pl_network.py /home/stud/${USER}/scripts/textCNN/
 COPY scripts/textCNN/data_set.py /home/stud/${USER}/scripts/textCNN/
-COPY scripts/textCNN/train.py /home/stud/${USER}/scripts/textCNN/
+COPY scripts/textCNN/data_module.py /home/stud/${USER}/scripts/textCNN/
+COPY scripts/textCNN/__main__.py /home/stud/${USER}/scripts/textCNN/
 
 RUN chown -R stud${USER} /home/stud/${USER}
 
