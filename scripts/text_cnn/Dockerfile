@@ -20,12 +20,12 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 # add the files necessary
 ADD data /home/stud/${USER}/data
-COPY scripts/textCNN/util.py /home/stud/${USER}/scripts/textCNN/
-COPY scripts/textCNN/preprocess.py /home/stud/${USER}/scripts/textCNN/
-COPY scripts/textCNN/pl_network.py /home/stud/${USER}/scripts/textCNN/
-COPY scripts/textCNN/data_set.py /home/stud/${USER}/scripts/textCNN/
-COPY scripts/textCNN/data_module.py /home/stud/${USER}/scripts/textCNN/
-COPY scripts/textCNN/__main__.py /home/stud/${USER}/scripts/textCNN/
+COPY scripts/text_cnn/util.py /home/stud/${USER}/scripts/text_cnn/
+COPY scripts/text_cnn/preprocess.py /home/stud/${USER}/scripts/text_cnn/
+COPY scripts/text_cnn/pl_network.py /home/stud/${USER}/scripts/text_cnn/
+COPY scripts/text_cnn/data_set.py /home/stud/${USER}/scripts/text_cnn/
+COPY scripts/text_cnn/data_module.py /home/stud/${USER}/scripts/text_cnn/
+COPY scripts/text_cnn/__main__.py /home/stud/${USER}/scripts/text_cnn/
 
 RUN chown -R stud${USER} /home/stud/${USER}
 

@@ -83,10 +83,10 @@ print(checkpoint)
 logger = TensorBoardLogger(log_path, name=log_name)
 if checkpoint is not None:
     model = PytorchLightningModule.load_from_checkpoint(checkpoint, loss_fn=loss_fn, device=device)
-    trainer = Trainer(max_epochs=epochs, logger=logger, resume_from_checkpoint=checkpoint)
+    trainer = Trainer(max_epochs=epochs, logger=logger, resume_from_checkpoint=checkpoint, gpus=2)
 else:
     model = PytorchLightningModule(loss_fn=loss_fn, device=device)
-    trainer = Trainer(max_epochs=epochs, logger=logger)
+    trainer = Trainer(max_epochs=epochs, logger=logger, gpus=2)
 module = DataModule(embeddings_path=os.path.join(base_path), batch_size=batch_size)
 trainer.fit(model, module)
 
