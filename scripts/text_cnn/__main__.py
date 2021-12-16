@@ -32,7 +32,7 @@ evaluation_ratio = 0.2  # ~20% of pairs for evaluation
 create_test_set = True
 test_ratio = 0.2  # ~20% of pairs for testing if desired
 
-preprocess = False
+preprocess = True
 
 # training parameters
 batch_size = 8
@@ -50,22 +50,24 @@ loss_fn = nn.BCELoss(reduction='mean').to(device)
 if not os.path.exists(log_path):
     os.makedirs(log_path)
 
-if(preprocess):
+if (preprocess):
     bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
 
     train_s1, train_s2, train_scores, train_ids, val_s1, val_s2, val_scores, val_ids, test_s1, test_s2, test_scores_normalized, test_scores_raw, test_ids \
         = preprocess_data(data_path, CSV_PATH, bert, create_test_set=create_test_set, validation_ratio=evaluation_ratio,
-                      test_ratio=test_ratio)
+                          test_ratio=test_ratio)
 
-    save_data(base_path, train_s1, train_s2, train_scores, train_ids, val_s1, val_s2, val_scores, val_ids, test_s1, test_s2,
-          test_scores_normalized, test_scores_raw, test_ids)
+    print()
+    save_data(base_path, train_s1, train_s2, train_scores, train_ids, val_s1, val_s2, val_scores, val_ids, test_s1,
+              test_s2,
+              test_scores_normalized, test_scores_raw, test_ids)
 
 # get latest checkpoint
 checkpoint = None
 checkpoint_dir = os.path.join(log_path, log_name)
 if os.path.exists(checkpoint_dir):
     versions = [os.path.join(checkpoint_dir, dir, "checkpoints") for dir in os.listdir(checkpoint_dir) if
-                os.path.isdir(os.path.join(checkpoint_dir, dir))]
+                os.path.isdir(os.path.join(checkpoint_dir, dir, "checkpoints"))]
     versions.sort(reverse=True)
     versions = list(
         filter(lambda cpdir: len([os.path.join(cpdir, _) for _ in os.listdir(cpdir) if _.endswith(".ckpt")]) > 0,
@@ -86,8 +88,9 @@ else:
     model = PytorchLightningModule(loss_fn=loss_fn, device=device)
     trainer = Trainer(max_epochs=epochs, logger=logger, gpus=2)
 module = DataModule(embeddings_path=os.path.join(base_path), batch_size=batch_size)
+print("Start training model!")
 trainer.fit(model, module)
+print("Finished training model!")
 
 trainer.test(model, module)
-
 print("Done!")
