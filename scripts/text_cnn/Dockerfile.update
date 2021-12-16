@@ -1,0 +1,27 @@
+FROM ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/text-cnn:0.0.1
+
+
+# config
+ARG USER=heinickel
+ARG UID=1308
+
+# Build from project root!
+WORKDIR /home/stud/${USER}
+COPY requirements.txt /home/stud/${USER}/
+# install correct pytorch version for the cluster gpus
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+# add the files necessary
+COPY scripts/text_cnn/util.py /home/stud/${USER}/scripts/text_cnn/
+COPY scripts/text_cnn/preprocess.py /home/stud/${USER}/scripts/text_cnn/
+COPY scripts/text_cnn/pl_network.py /home/stud/${USER}/scripts/text_cnn/
+COPY scripts/text_cnn/data_set.py /home/stud/${USER}/scripts/text_cnn/
+COPY scripts/text_cnn/data_module.py /home/stud/${USER}/scripts/text_cnn/
+COPY scripts/text_cnn/__main__.py /home/stud/${USER}/scripts/text_cnn/
+
+RUN chown -R stud${USER} /home/stud/${USER}
+
+ENV LANG C.UTF-8
+ENV LC_ALL C.UTF-8
+
+

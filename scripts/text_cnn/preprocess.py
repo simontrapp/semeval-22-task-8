@@ -4,9 +4,10 @@ import pandas
 import random
 from util import lable2ohe, process_json_to_sentences, process_article_to_encoding
 from sentence_transformers import SentenceTransformer
-import logging as log
 import nltk
+
 nltk.download('punkt')
+
 
 def preprocess_data(DATA_DIR, CSV_PATH, model, create_test_set=True, validation_ratio=0.2, test_ratio=0.2):
     training_ids = []
@@ -25,11 +26,11 @@ def preprocess_data(DATA_DIR, CSV_PATH, model, create_test_set=True, validation_
     test_scores_normalized = []
     test_scores_raw = []
 
-    log.info("Starting reading the data")
-    sentence_pairs = pandas.read_csv(CSV_PATH).iloc[:20]
+    print("Starting reading the data")
+    sentence_pairs = pandas.read_csv(CSV_PATH)
     for index, row in sentence_pairs.iterrows():
-        # if(index%100 == 0):
-        log.info(f"[{index:>5d}/{len(sentence_pairs):>5d}]")
+        if index % 50 == 0:
+            print(f"[{index:>5d}/{len(sentence_pairs):>5d}]")
         pair_id = row['pair_id']
         overall_score = row['Overall']
         pair_ids = pair_id.split('_')
@@ -69,18 +70,18 @@ def preprocess_data(DATA_DIR, CSV_PATH, model, create_test_set=True, validation_
     evaluation_sentences_1, evaluation_sentences_2 = pad_len(evaluation_sentences_1, evaluation_sentences_2)
     test_sentences_1, test_sentences_2 = pad_len(test_sentences_1, test_sentences_2)
 
-    log.info("start calculating embeddings")
+    print("start calculating embeddings")
     training_sentences_1 = encode_sentences(training_sentences_1, model)
     training_sentences_2 = encode_sentences(training_sentences_2, model)
-    log.info("calculated train embeddings")
+    print("calculated train embeddings")
 
     test_sentences_1 = encode_sentences(test_sentences_1, model)
     test_sentences_2 = encode_sentences(test_sentences_2, model)
-    log.info("calculated validation embeddings")
+    print("calculated validation embeddings")
 
     evaluation_sentences_1 = encode_sentences(evaluation_sentences_1, model)
     evaluation_sentences_2 = encode_sentences(evaluation_sentences_2, model)
-    log.info("calculated test embeddings")
+    print("calculated test embeddings")
 
     return training_sentences_1, training_sentences_2, training_scores, training_ids, \
            evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, evaluation_ids, \
@@ -101,7 +102,8 @@ def encode_sentences(sentences, model):
     return np.array(sentences)
 
 
-def save_data(base_path, training_sentences_1, training_sentences_2, training_scores, training_ids, validation_sentences_1,
+def save_data(base_path, training_sentences_1, training_sentences_2, training_scores, training_ids,
+              validation_sentences_1,
               validation_sentences_2, validation_scores, validation_ids, test_sentences_1, test_sentences_2,
               test_scores_normalized,
               test_scores_raw, test_ids):
@@ -192,4 +194,3 @@ def load_data(embeddings_path):
     return training_sentences_1, training_sentences_2, training_scores, training_ids, \
            validation_sentences_1, validation_sentences_2, validation_scores, validation_ids, \
            test_sentences_1, test_sentences_2, test_scores_normalized, test_scores_raw, test_ids
-

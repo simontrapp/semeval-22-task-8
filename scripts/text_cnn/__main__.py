@@ -8,7 +8,6 @@ from data_module import DataModule
 from preprocess import preprocess_data, save_data
 
 from pytorch_lightning.loggers import TensorBoardLogger
-import logging as log
 from sentence_transformers import SentenceTransformer
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -50,7 +49,6 @@ loss_fn = nn.BCELoss(reduction='mean').to(device)
 """
 if not os.path.exists(log_path):
     os.makedirs(log_path)
-log.basicConfig(filename=os.path.join(log_path, ".log"), level=log.INFO)
 
 if(preprocess):
     bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
