@@ -8,6 +8,7 @@ from util import lable2ohe, process_json_to_sentences, process_article_to_encodi
 from sentence_transformers import SentenceTransformer
 import nltk
 import shutil
+import torch
 
 nltk.download('punkt')
 
@@ -19,25 +20,19 @@ def preprocess_data(DATA_DIR, CSV_PATH, result_base_path, model, create_test_set
     test_ids_out = os.path.join(result_base_path, "embeddings", "test_ids.csv")
     ids_exist = os.path.exists(training_ids_out) and os.path.exists(validation_ids_out) and os.path.exists(test_ids_out)
 
-    training_sentences_1_out = os.path.join(result_base_path, "embeddings", "train_sentence_1.npy")
-    training_sentences_2_out = os.path.join(result_base_path, "embeddings", "train_sentence_2.npy")
+    training_sentences_out = os.path.join(result_base_path, "embeddings", "train_sentence.npy")
     training_scores_out = os.path.join(result_base_path, "embeddings", "train_scores.npy")
-    validation_sentences_1_out = os.path.join(result_base_path, "embeddings", "validation_sentence_1.npy")
-    validation_sentences_2_out = os.path.join(result_base_path, "embeddings", "validation_sentence_2.npy")
+    validation_sentences_out = os.path.join(result_base_path, "embeddings", "validation_sentence.npy")
     validation_scores_out = os.path.join(result_base_path, "embeddings", "validation_scores.npy")
-    test_sentences_1_out = os.path.join(result_base_path, "embeddings", "test_sentence_1.npy")
-    test_sentences_2_out = os.path.join(result_base_path, "embeddings", "test_sentence_2.npy")
+    test_sentences_out = os.path.join(result_base_path, "embeddings", "test_sentence.npy")
     test_scores_normalized_out = os.path.join(result_base_path, "embeddings", "test_scores_normalized.npy")
     test_scores_raw_out = os.path.join(result_base_path, "embeddings", "test_scores_raw.npy")
-    all_files_exist = os.path.exists(training_sentences_1_out) and os.path.exists(training_sentences_2_out) \
-                      and os.path.exists(training_scores_out) and os.path.exists(
-        validation_sentences_1_out) and os.path.exists(validation_sentences_2_out) \
-                      and os.path.exists(validation_scores_out) and os.path.exists(
-        validation_scores_out and os.path.exists(test_sentences_1_out)) \
-                      and os.path.exists(test_sentences_2_out) and os.path.exists(
+    all_files_exist = os.path.exists(training_sentences_out) and os.path.exists(training_scores_out) and os.path.exists(
+        validation_sentences_out) and os.path.exists(validation_scores_out) and os.path.exists(
+        validation_scores_out and os.path.exists(test_sentences_out)) and os.path.exists(
         test_scores_normalized_out) and os.path.exists(test_scores_raw_out)
 
-    #if ids_exist and all_files_exist:
+    # if ids_exist and all_files_exist:
     #    shutil.rmtree(os.path.join(result_base_path, "embeddings"))
 
     if not os.path.exists(os.path.join(result_base_path, "embeddings")):
@@ -61,7 +56,7 @@ def preprocess_data(DATA_DIR, CSV_PATH, result_base_path, model, create_test_set
 
     if not ids_exist:
         print("Starting reading the data")
-        sentence_pairs = pandas.read_csv(CSV_PATH)
+        sentence_pairs = pandas.read_csv(CSV_PATH).iloc[:20]
         for index, row in sentence_pairs.iterrows():
             if index % 50 == 0:
                 print(f"[{index:>5d}/{len(sentence_pairs):>5d}]")
@@ -118,26 +113,20 @@ def preprocess_data(DATA_DIR, CSV_PATH, result_base_path, model, create_test_set
     print("start calculating train embeddings")
 
     training_sentences_1, training_sentences_2 = load_sentences(training_ids, DATA_DIR)
-    #training_sentences_1, training_sentences_2 = pad_len(training_sentences_1, training_sentences_2)
-    training_sentences_1 = encode_sentences(training_sentences_1, model, training_sentences_1_out)
-    training_sentences_2 = encode_sentences(training_sentences_2, model, training_sentences_2_out)
+    train_sentences = encode_sentences(training_sentences_1, training_sentences_2, model, training_sentences_out)
     print("calculated train embeddings")
 
     evaluation_sentences_1, evaluation_sentences_2 = load_sentences(evaluation_ids, DATA_DIR)
-    #evaluation_sentences_1, evaluation_sentences_2 = pad_len(evaluation_sentences_1, evaluation_sentences_2)
-    evaluation_sentences_1 = encode_sentences(evaluation_sentences_1, model, validation_sentences_1_out)
-    evaluation_sentences_2 = encode_sentences(evaluation_sentences_2, model, validation_sentences_2_out)
+    evaluation_sentences = encode_sentences(evaluation_sentences_1, evaluation_sentences_2, model, validation_sentences_out)
     print("calculated validation embeddings")
 
     test_sentences_1, test_sentences_2 = load_sentences(test_ids, DATA_DIR)
-    #test_sentences_1, test_sentences_2 = pad_len(test_sentences_1, test_sentences_2)
-    test_sentences_1 = encode_sentences(test_sentences_1, model, test_sentences_1_out)
-    test_sentences_2 = encode_sentences(test_sentences_2, model, test_sentences_2_out)
+    test_sentences = encode_sentences(test_sentences_1, test_sentences_2, model, test_sentences_out)
     print("calculated test embeddings")
 
-    return training_sentences_1, training_sentences_2, training_scores, training_ids, \
-           evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, evaluation_ids, \
-           test_sentences_1, test_sentences_2, test_scores_normalized, test_scores_raw, test_ids
+    return train_sentences, training_scores, training_ids, \
+           evaluation_sentences, evaluation_scores, evaluation_ids, \
+           test_sentences, test_scores_normalized, test_scores_raw, test_ids
 
 
 def pad_len(sentences_1, sentences_2):
@@ -170,8 +159,12 @@ def load_sentences(pair_ids, data_path):
     return s_1, s_2
 
 
-def encode_sentences(sentences, model, result_path):
-    print(f"start calculation for {len(sentences)} sentences to {result_path}")
+def encode_sentences(sentences_1, sentences_2, model, result_path):
+    max_1 = np.max([len(x) for x in sentences_1])
+    max_2 = np.max([len(x) for x in sentences_2])
+    max = np.max([max_1, max_2])
+
+    print(f"start calculation for {len(sentences_1)} article pairs to {result_path}")
     batch_size = 100
     if os.path.exists(result_path):
         loaded = np.load(result_path, allow_pickle=True)
@@ -180,18 +173,23 @@ def encode_sentences(sentences, model, result_path):
         loaded = None
         print("Nothing loaded. start calculating")
 
-    to_process = sentences[loaded.shape[0] if loaded is not None else 0:]
+    to_process_1 = sentences_1[loaded.shape[0] if loaded is not None else 0:]
+    to_process_2 = sentences_1[loaded.shape[0] if loaded is not None else 0:]
     calculated = []
     i = 0
-    for index, row in enumerate(to_process):
-        calculated.append(model.encode(row))
+    for index, (row_1, row_2) in enumerate(zip(to_process_1, to_process_2)):
+        c_1 = model.encode(row_1)
+        c_1 = np.concatenate((c_1, np.zeros((max - c_1.shape[0], c_1.shape[1]))))
+        c_2 = model.encode(row_2)
+        c_2 = np.concatenate((c_2, np.zeros((max - c_2.shape[0], c_2.shape[1]))))
+        calculated.append(np.array([c_1, c_2]))
         i += 1
         if i == batch_size:
             if loaded is None:
                 loaded = np.array(calculated)
             else:
                 loaded = np.concatenate((loaded, np.array(calculated)))
-            print(f"calculated {loaded.shape[0]}/{len(sentences)}")
+            print(f"calculated {loaded.shape[0]}/{len(sentences_1)}")
             np.save(result_path, loaded)
             calculated = []
             i = 0
@@ -202,52 +200,36 @@ def encode_sentences(sentences, model, result_path):
             loaded = np.concatenate((loaded, np.array(calculated)))
     np.save(result_path, loaded)
 
-    assert len(sentences) == loaded.shape[0]
+    assert len(sentences_1) == loaded.shape[0]
     return loaded
 
 
 def load_data(embeddings_path):
-    base_path = embeddings_path
+    training_ids_out = os.path.join(embeddings_path, "embeddings", "train_ids.csv")
+    validation_ids_out = os.path.join(embeddings_path, "embeddings", "validation_ids.csv")
+    test_ids_out = os.path.join(embeddings_path, "embeddings", "test_ids.csv")
 
-    training_ids_out = os.path.join(base_path, "embeddings", "train_ids.csv")
+    training_sentences_out = os.path.join(embeddings_path, "embeddings", "train_sentence.npy")
+    training_scores_out = os.path.join(embeddings_path, "embeddings", "train_scores.npy")
+    validation_sentences_out = os.path.join(embeddings_path, "embeddings", "validation_sentence.npy")
+    validation_scores_out = os.path.join(embeddings_path, "embeddings", "validation_scores.npy")
+    test_sentences_out = os.path.join(embeddings_path, "embeddings", "test_sentence.npy")
+    test_scores_normalized_out = os.path.join(embeddings_path, "embeddings", "test_scores_normalized.npy")
+    test_scores_raw_out = os.path.join(embeddings_path, "embeddings", "test_scores_raw.npy")
+
     training_ids = pandas.read_csv(training_ids_out)
-
-    training_sentences_1_out = os.path.join(base_path, "embeddings", "train_sentence_1.npy")
-    training_sentences_1 = np.load(training_sentences_1_out, allow_pickle=True)
-
-    training_sentences_2_out = os.path.join(base_path, "embeddings", "train_sentence_2.npy")
-    training_sentences_2 = np.load(training_sentences_2_out, allow_pickle=True)
-
-    training_scores_out = os.path.join(base_path, "embeddings", "train_scores.npy")
+    training_sentences = np.load(training_sentences_out, allow_pickle=True)
     training_scores = np.load(training_scores_out, allow_pickle=True)
 
-    validation_ids_out = os.path.join(base_path, "embeddings", "validation_ids.csv")
     validation_ids = pandas.read_csv(validation_ids_out)
-
-    validation_sentences_1_out = os.path.join(base_path, "embeddings", "validation_sentence_1.npy")
-    validation_sentences_1 = np.load(validation_sentences_1_out, allow_pickle=True)
-
-    validation_sentences_2_out = os.path.join(base_path, "embeddings", "validation_sentence_2.npy")
-    validation_sentences_2 = np.load(validation_sentences_2_out, allow_pickle=True)
-
-    validation_scores_out = os.path.join(base_path, "embeddings", "validation_scores.npy")
+    validation_sentences = np.load(validation_sentences_out, allow_pickle=True)
     validation_scores = np.load(validation_scores_out, allow_pickle=True)
 
-    test_ids_out = os.path.join(base_path, "embeddings", "test_ids.csv")
     test_ids = pandas.read_csv(test_ids_out)
-
-    test_sentences_1_out = os.path.join(base_path, "embeddings", "test_sentence_1.npy")
-    test_sentences_1 = np.load(test_sentences_1_out, allow_pickle=True)
-
-    test_sentences_2_out = os.path.join(base_path, "embeddings", "test_sentence_2.npy")
-    test_sentences_2 = np.load(test_sentences_2_out, allow_pickle=True)
-
-    test_scores_normalized_out = os.path.join(base_path, "embeddings", "test_scores_normalized.npy")
+    test_sentences = np.load(test_sentences_out, allow_pickle=True)
     test_scores_normalized = np.load(test_scores_normalized_out, allow_pickle=True)
-
-    test_scores_raw_out = os.path.join(base_path, "embeddings", "test_scores_raw.npy")
     test_scores_raw = np.load(test_scores_raw_out, allow_pickle=True)
 
-    return training_sentences_1, training_sentences_2, training_scores, training_ids, \
-           validation_sentences_1, validation_sentences_2, validation_scores, validation_ids, \
-           test_sentences_1, test_sentences_2, test_scores_normalized, test_scores_raw, test_ids
+    return training_sentences, training_scores, training_ids, \
+           validation_sentences, validation_scores, validation_ids, \
+           test_sentences, test_scores_normalized, test_scores_raw, test_ids
