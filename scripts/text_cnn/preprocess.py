@@ -56,7 +56,7 @@ def preprocess_data(DATA_DIR, CSV_PATH, result_base_path, model, create_test_set
 
     if not ids_exist:
         print("Starting reading the data")
-        sentence_pairs = pandas.read_csv(CSV_PATH).iloc[:20]
+        sentence_pairs = pandas.read_csv(CSV_PATH)
         for index, row in sentence_pairs.iterrows():
             if index % 50 == 0:
                 print(f"[{index:>5d}/{len(sentence_pairs):>5d}]")
