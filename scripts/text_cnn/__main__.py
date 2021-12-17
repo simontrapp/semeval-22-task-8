@@ -54,15 +54,10 @@ if not os.path.exists(log_path):
 
 if (preprocess):
     bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
+    bert.max_seq_length = 512
 
-    train_s, train_scores, train_ids, val_s, val_scores, val_ids, test_s, test_scores_normalized, test_scores_raw, test_ids \
-        = preprocess_data(data_path, CSV_PATH,base_path, bert, create_test_set=create_test_set, validation_ratio=evaluation_ratio,
-                          test_ratio=test_ratio)
-
-    print()
-    #save_data(base_path, train_s1, train_s2, train_scores, train_ids, val_s1, val_s2, val_scores, val_ids, test_s1,
-     #         test_s2,
-      #        test_scores_normalized, test_scores_raw, test_ids)
+    preprocess_data(data_path, CSV_PATH, base_path, bert, create_test_set=create_test_set,
+                    validation_ratio=evaluation_ratio, test_ratio=test_ratio)
 
 # get latest checkpoint
 checkpoint = None
@@ -85,18 +80,16 @@ print(checkpoint)
 logger = TensorBoardLogger(log_path, name=log_name)
 if checkpoint is not None:
     model = PytorchLightningModule.load_from_checkpoint(checkpoint, loss_fn=loss_fn, device=device)
-    trainer = Trainer( logger=logger, resume_from_checkpoint=checkpoint, gpus=1)
+    trainer = Trainer(logger=logger, resume_from_checkpoint=checkpoint, gpus=1)
 else:
     model = PytorchLightningModule(loss_fn=loss_fn, device=device)
-    trainer = Trainer( logger=logger, gpus=1)
-
+    trainer = Trainer(logger=logger, gpus=1)
 
 module = DataModule(embeddings_path=os.path.join(base_path), batch_size=batch_size)
 print("Start training model!")
 model.train()
 trainer.fit(model, module)
 print("Finished training model!")
-
 
 # trainer.test(model, module)
 print("Done!")
