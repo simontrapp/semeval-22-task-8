@@ -7,6 +7,7 @@ ARG UID=1308
 RUN mkdir -p /home/stud/${USER}/scripts/textCNN
 RUN mkdir -p /home/stud/${USER}/models
 RUN mkdir -p /home/stud/${USER}/logs
+RUN mkdir -p /home/stud/${USER}/data/embeddings
 RUN adduser stud${USER} --uid ${UID} --home /home/stud/${USER}/ --disabled-password --gecos "" --no-create-home
 
 # Build from project root!

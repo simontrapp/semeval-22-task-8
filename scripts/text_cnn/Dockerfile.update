@@ -11,6 +11,7 @@ COPY requirements.txt /home/stud/${USER}/
 # install correct pytorch version for the cluster gpus
 RUN pip3 install --no-cache-dir -r requirements.txt
 
+RUN mkdir -p /home/stud/${USER}/data/embeddings
 # add the files necessary
 COPY scripts/text_cnn/util.py /home/stud/${USER}/scripts/text_cnn/
 COPY scripts/text_cnn/preprocess.py /home/stud/${USER}/scripts/text_cnn/
