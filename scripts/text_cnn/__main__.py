@@ -5,7 +5,7 @@ from pytorch_lightning import Trainer
 
 from pl_network import PytorchLightningModule
 from data_module import DataModule
-from preprocess import preprocess_data, save_data
+from preprocess import preprocess_data
 
 from pytorch_lightning.loggers import TensorBoardLogger
 from sentence_transformers import SentenceTransformer
@@ -54,13 +54,13 @@ if (preprocess):
     bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
 
     train_s1, train_s2, train_scores, train_ids, val_s1, val_s2, val_scores, val_ids, test_s1, test_s2, test_scores_normalized, test_scores_raw, test_ids \
-        = preprocess_data(data_path, CSV_PATH, bert, create_test_set=create_test_set, validation_ratio=evaluation_ratio,
+        = preprocess_data(data_path, CSV_PATH,base_path, bert, create_test_set=create_test_set, validation_ratio=evaluation_ratio,
                           test_ratio=test_ratio)
 
     print()
-    save_data(base_path, train_s1, train_s2, train_scores, train_ids, val_s1, val_s2, val_scores, val_ids, test_s1,
-              test_s2,
-              test_scores_normalized, test_scores_raw, test_ids)
+    #save_data(base_path, train_s1, train_s2, train_scores, train_ids, val_s1, val_s2, val_scores, val_ids, test_s1,
+     #         test_s2,
+      #        test_scores_normalized, test_scores_raw, test_ids)
 
 # get latest checkpoint
 checkpoint = None
@@ -83,10 +83,10 @@ print(checkpoint)
 logger = TensorBoardLogger(log_path, name=log_name)
 if checkpoint is not None:
     model = PytorchLightningModule.load_from_checkpoint(checkpoint, loss_fn=loss_fn, device=device)
-    trainer = Trainer(max_epochs=epochs, logger=logger, resume_from_checkpoint=checkpoint, gpus=2)
+    trainer = Trainer(max_epochs=epochs, logger=logger, resume_from_checkpoint=checkpoint, gpus=1)
 else:
     model = PytorchLightningModule(loss_fn=loss_fn, device=device)
-    trainer = Trainer(max_epochs=epochs, logger=logger, gpus=2)
+    trainer = Trainer(max_epochs=epochs, logger=logger, gpus=1)
 module = DataModule(embeddings_path=os.path.join(base_path), batch_size=batch_size)
 print("Start training model!")
 trainer.fit(model, module)
