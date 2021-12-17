@@ -6,11 +6,8 @@ from torch.utils.data import DataLoader
 
 from pl_network import PytorchLightningModule
 from data_module import DataModule
-from preprocess import preprocess_data, load_data
-from data_set import SentenceDataset
 
 from pytorch_lightning.loggers import TensorBoardLogger
-from sentence_transformers import SentenceTransformer
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 device_pl = "gpu" if device == "cuda" else device
@@ -37,7 +34,7 @@ test_ratio = 0.2  # ~20% of pairs for testing if desired
 preprocess = True
 
 # training parameters
-batch_size = 8
+batch_size = 4
 epochs = 1
 
 loss_fn = nn.BCELoss(reduction='mean').to(device)
@@ -51,13 +48,6 @@ loss_fn = nn.BCELoss(reduction='mean').to(device)
 """
 if not os.path.exists(log_path):
     os.makedirs(log_path)
-
-if (preprocess):
-    bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
-    bert.max_seq_length = 512
-
-    preprocess_data(data_path, CSV_PATH, base_path, bert, create_test_set=create_test_set,
-                    validation_ratio=evaluation_ratio, test_ratio=test_ratio)
 
 # get latest checkpoint
 checkpoint = None
@@ -85,7 +75,7 @@ else:
     model = PytorchLightningModule(loss_fn=loss_fn, device=device)
     trainer = Trainer(logger=logger, gpus=1)
 
-module = DataModule(embeddings_path=os.path.join(base_path), batch_size=batch_size)
+module = DataModule(data_path, CSV_PATH, base_path, evaluation_ratio, test_ratio, batch_size)
 print("Start training model!")
 model.train()
 trainer.fit(model, module)

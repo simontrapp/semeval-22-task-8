@@ -24,7 +24,7 @@ spec:
             limits:
               nvidia.com/gpu: "2"
               cpu: "10"
-              memory: "32Gi"
+              memory: "64Gi"
           command: ["bash", "-c", "cd /home/stud/heinickel/scripts/text_cnn/ && python3 -u __main__.py"]
           volumeMounts:
             - mountPath: /home/stud/heinickel/models # directory IN the container
