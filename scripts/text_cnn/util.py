@@ -74,3 +74,8 @@ def ohe2lable(ohe):
 # return 0-1 scores to 1-4 form
 def unnormalize_scores(scores: list):
     return [s * 3 + 1 for s in scores]  # TODO: convert to integer scores ( round() )
+
+def pad_input(data):
+    max = np.max([x.shape[1] for x in data])
+    padded = [np.concatenate((x, np.zeros((x.shape[0], max - x.shape[1], x.shape[2]))), axis=1) for x in data]
+    return torch.Tensor(np.array(padded))
