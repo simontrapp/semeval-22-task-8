@@ -18,8 +18,6 @@ class PytorchLightningModule(LightningModule):
         super().__init__()
 
         self.loss_fn = loss_fn
-        self.embdg_1 = bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
-        self.embdg_2 = bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
         self.network_1 = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=100, kernel_size=(3, 3)),
             nn.ReLU6(),
@@ -126,8 +124,10 @@ class PytorchLightningModule(LightningModule):
         pred = [torch.argmax(step['pred'], dim=1) for step in validation_step_outputs]
         pred = torch.concat(pred, dim=0) if len(pred) > 1 else pred[0]
         csv = pandas.read_csv(os.path.join("..", "..", "data", "embeddings", "test_ids.csv"), index_col=False)
-        csv['predictions'] = pred
-        csv.to_csv(os.path.join("..", "..", "logs", "predictions.csv"), index=False)
+        #csv['predictions'] = pred
+        df = pandas.DataFrame({'predictions':pred, 'pair_id': csv['pair_id'].to_list()})
+
+        df.to_csv(os.path.join("..", "..", "logs", "predictions.csv"), index=False)
 
         for key in validation_step_outputs[0]["log"]:
             dict[key] = np.sum([x["log"][key].cpu().numpy() for x in validation_step_outputs]) / lenght

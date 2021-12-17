@@ -1,5 +1,6 @@
 from torch.utils.data import Dataset
 import torch
+from util import pad_input
 
 
 class SentenceDataset(Dataset):
@@ -17,4 +18,6 @@ class SentenceDataset(Dataset):
         s1 = self.sentences_1[idx]
         s2 = self.sentences_2[idx]
         label = self.labels[idx]
-        return torch.tensor([s1, s2]), torch.Tensor(label).float()
+        pad = pad_input([torch.Tensor([s1]),torch.tensor([s2])])
+        pad = pad.resize(2, pad.size()[2], pad.size()[3])
+        return pad, torch.Tensor(label).float()
