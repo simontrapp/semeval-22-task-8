@@ -36,7 +36,7 @@ preprocess = True
 
 # training parameters
 batch_size = 8
-epochs = 1
+epochs = 5
 
 loss_fn = nn.BCELoss(reduction='mean').to(device)
 

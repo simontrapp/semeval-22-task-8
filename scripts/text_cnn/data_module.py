@@ -21,29 +21,21 @@ class DataModule(pl.LightningDataModule):
         print(f"Finished reading the data!\n# training sentence pairs: {len(training_sentences_1)}\n"
               f"# evaluation sentence pairs: {len(validation_sentences_1)}\n"
               f"# test sentence pairs: {len(test_sentences_1)}")
-        self.train_dl = DataLoader(SentenceDataset(training_sentences_1, training_sentences_2, training_scores),
-                                   shuffle=True, batch_size=self.batch_size, collate_fn=my_collate)
-        self.val_dl = DataLoader(SentenceDataset(validation_sentences_1, validation_sentences_2, validation_scores),
-                                 shuffle=False, batch_size=self.batch_size, collate_fn=my_collate)
-        self.test_dl = DataLoader(SentenceDataset(test_sentences_1, test_sentences_2, test_scores_normalized),
-                                  shuffle=False, batch_size=self.batch_size, collate_fn=my_collate)
-        self.pred_dl = self.test_dl
+        self.train_ds = SentenceDataset(training_sentences_1, training_sentences_2, training_scores)
+        self.val_ds = SentenceDataset(validation_sentences_1, validation_sentences_2, validation_scores)
+        self.test_ds = SentenceDataset(test_sentences_1, test_sentences_2, test_scores_normalized)
 
     def train_dataloader(self):
-        return self.train_dl
+        return DataLoader(self.train_ds, shuffle=True, batch_size=self.batch_size, collate_fn=my_collate)
 
     def val_dataloader(self):
-        return self.val_dl
+        return DataLoader(self.val_ds, shuffle=False, batch_size=self.batch_size, collate_fn=my_collate)
 
     def test_dataloader(self):
-        return self.test_dl
-
-    def predict_dataloader(self):
-        return self.pred_dl
+        return DataLoader(self.test_ds, shuffle=False, batch_size=self.batch_size, collate_fn=my_collate)
 
 
 def my_collate(batch):
-
     data = [item[0].numpy() for item in batch]
     # print(data.shape)
     padded = pad_input(data)

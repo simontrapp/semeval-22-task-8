@@ -15,7 +15,7 @@ from util import MaxOverTimePooling
 
 class PytorchLightningModule(LightningModule):
     def __init__(self, loss_fn, device="cuda"):
-        super().__init__()
+        super(PytorchLightningModule,self).__init__()
 
         self.loss_fn = loss_fn
         self.network_1 = nn.Sequential(
