@@ -19,32 +19,27 @@ class PytorchLightningModule(LightningModule):
 
         self.loss_fn = loss_fn
         self.network_1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=100, kernel_size=(3, 3)),
+            nn.Conv2d(in_channels=1, out_channels=100, kernel_size=(3, 3), bias=False),
             nn.ReLU6(),
-            nn.Conv2d(in_channels=100, out_channels=200, kernel_size=(3, 3)),
+            nn.Conv2d(in_channels=100, out_channels=200, kernel_size=(3, 3), bias=False),
             nn.Dropout(0.2),
             nn.ReLU6(),
             MaxOverTimePooling()
         )
         self.network_2 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=100, kernel_size=(3, 3)),
+            nn.Conv2d(in_channels=1, out_channels=100, kernel_size=(3, 3), bias=False),
             nn.ReLU6(),
-            nn.Conv2d(in_channels=100, out_channels=200, kernel_size=(3, 3)),
+            nn.Conv2d(in_channels=100, out_channels=200, kernel_size=(3, 3), bias=False),
             nn.Dropout(0.2),
             nn.ReLU6(),
             MaxOverTimePooling()
         )
 
         self.final_network = nn.Sequential(
-            nn.Linear(in_features=400, out_features=300),
-            nn.ReLU6(),
-            nn.Linear(in_features=300, out_features=200),
+            nn.Linear(in_features=400, out_features=100, bias=False),
             nn.Dropout(0.2),
             nn.ReLU6(),
-            nn.Linear(in_features=200, out_features=100),
-            nn.ReLU6(),
-            nn.Linear(in_features=100, out_features=4),
-            nn.Dropout(0.2),
+            nn.Linear(in_features=100, out_features=4, bias=False),
             nn.Softmax(dim=1)
         )
 
