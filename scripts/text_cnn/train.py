@@ -18,6 +18,7 @@ def _shared_eval_step(self, batch, batch_idx):
 
     return y_hat, loss, acc, _iou
 
+
 def train(model, loss_fn, optimizer, device, train_dataloader, epoch=0, result_path=None):
     writer = SummaryWriter("../../logs/tb_logs/text-cnn")
     size = len(train_dataloader.dataset)
@@ -34,7 +35,7 @@ def train(model, loss_fn, optimizer, device, train_dataloader, epoch=0, result_p
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        if batch_index % 50 ==0:
+        if batch_index % 20 == 0:
             print("")
     writer.flush()
     writer.close()
@@ -51,7 +52,7 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
     for batch_index, (X, y) in enumerate(pbar):
         pbar.set_description(pbar_description)
         sys.stdout.flush()
-        X,y = X.to(device), y.to(device)
+        X, y = X.to(device), y.to(device)
         pred = model(X).detach()
         acc[batch_index] = accuracy(pred, y.int()).detach().cpu().numpy()
         if p is None:
@@ -60,7 +61,7 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
         else:
             p = torch.cat((p, pred), dim=0)
             l = torch.cat((l, y), dim=0)
-        if batch_index % 50 ==0:
+        if batch_index % 50 == 0:
             print("")
 
     p = torch.argmax(p, dim=1).detach()
