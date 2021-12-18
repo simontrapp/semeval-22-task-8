@@ -47,8 +47,8 @@ class TextCnn(nn.Module):
             nn.Linear(in_features=400, out_features=100, bias=False),
             nn.Dropout(0.2),
             nn.ReLU6(),
-            nn.Linear(in_features=100, out_features=4, bias=False),
-            nn.Softmax(dim=1)
+            nn.Linear(in_features=100, out_features=1, bias=False),
+            #nn.Softmax(dim=1)
         )
 
     def forward(self, x):

@@ -26,4 +26,4 @@ class SentenceDataset(Dataset):
         e2 = np.concatenate((e2, np.zeros((self.max - e2.shape[0], e2.shape[1]))))
         embedding = np.array([e1,e2])
         label = self.labels[idx]
-        return torch.Tensor(embedding), torch.Tensor(label).float()
+        return torch.Tensor(embedding), torch.Tensor([label]).float()

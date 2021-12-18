@@ -38,8 +38,8 @@ test_ratio = 0.2  # ~20% of pairs for testing if desired
 preprocess = True
 
 # training parameters
-batch_size = 16
-epochs = 5
+batch_size = 2
+epochs = 20
 
 """
 ---------------------------------------------------------------------
@@ -97,7 +97,7 @@ train_dl = DataLoader(train_ds, shuffle=True, batch_size=batch_size)
 val_dl = DataLoader(val_ds, shuffle=False, batch_size=batch_size)
 test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size)
 
-loss_fn = nn.BCELoss(reduction='mean').to(device)
+loss_fn = nn.MSELoss().to(device)
 network = TextCnn(loss_fn, device).to(device)
 summary(network,(2,40 ,512))
 optimizer = Adam(network.parameters(), 1e-3)
