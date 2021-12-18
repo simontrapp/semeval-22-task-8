@@ -9,7 +9,7 @@ class SentenceDataset(Dataset):
     def __init__(self, sentences_1, sentences_2, label, encoder):
         super(SentenceDataset, self).__init__()
         max_1, max_2 = np.max([len(s) for s in sentences_1]), np.max([len(s) for s in sentences_2])
-        self.max = np.max([max_1,max_2])
+        self.max = max(np.max([max_1,max_2]), 16)
         self.sentences_1 = sentences_1
         self.sentences_2 = sentences_2
         self.labels = label

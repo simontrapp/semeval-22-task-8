@@ -53,7 +53,7 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
         sys.stdout.flush()
         X,y = X.to(device), y.to(device)
         pred = model(X).detach()
-        acc[batch_index] = accuracy(pred, y.int()).detach().numpy()
+        acc[batch_index] = accuracy(pred, y.int()).detach().cpu().numpy()
         if p is None:
             p = pred
             l = y
