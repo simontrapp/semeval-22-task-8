@@ -61,11 +61,16 @@ class PytorchLightningModule(LightningModule):
         x = torch.cat((x_1, x_2), dim=1).reshape(x_1.size()[0], 400)
         return self.final_network(x)
 
+    def on_train_batch_start(self, batch, batch_idx, unused=0):
+        pass
+
     def training_step(self, batch, batch_idx):
         x, y = batch
-        logits = self(x)
+        logits = self.forward(x)
         loss = self.loss_fn(logits, y)
         logs = {"train_loss": loss.detach()}
+        self.log("my_loss", loss, on_step=True, on_epoch=True, prog_bar=True, logger=True)
+
         batch_dictionary = {
             # REQUIRED: It ie required for us to return "loss"
             "loss": loss,
@@ -78,43 +83,43 @@ class PytorchLightningModule(LightningModule):
         return Adam(self.parameters(), 1e-3)
 
 
-# def validation_step(self, batch, batch_idx):
-#     pred, loss, acc, iou = self._shared_eval_step(batch, batch_idx)
-#     self.log("val_loss", loss)
-#     self.log("val_iou", iou)
-#     logs = {"train_loss": loss, "accuracy": acc, "iou": iou}
-#     batch_dictionary = {
-#         # REQUIRED: It ie required for us to return "loss"
-#         "loss": loss,
-#         # optional for batch logging purposes
-#         "log": logs,
-#         "pred": pred,
-#     }
-#     return batch_dictionary
-#
-# def test_step(self, batch, batch_idx):
-#     pred, loss, acc, iou = self._shared_eval_step(batch, batch_idx)
-#     self.log("val_loss", loss)
-#     self.log("val_iou", iou)
-#     logs = {"train_loss": loss, "accuracy": acc, "iou": iou}
-#     batch_dictionary = {
-#         # REQUIRED: It ie required for us to return "loss"
-#         "loss": loss,
-#         # optional for batch logging purposes
-#         "log": logs,
-#         # "pred": pred,
-#     }
-#     return batch_dictionary
-#
-# def _shared_eval_step(self, batch, batch_idx):
-#     x, y = batch
-#     y_hat = self(x)
-#     loss = self.loss_fn(y_hat, y)
-#     y = y.int()
-#     acc = accuracy(y_hat, y)
-#     _iou = iou(y_hat, y, num_classes=2)
-#
-#     return y_hat, loss, acc, _iou
+    def validation_step(self, batch, batch_idx):
+        pred, loss, acc, iou = self._shared_eval_step(batch, batch_idx)
+        self.log("val_loss", loss)
+        self.log("val_iou", iou)
+        logs = {"train_loss": loss, "accuracy": acc, "iou": iou}
+        batch_dictionary = {
+         # REQUIRED: It ie required for us to return "loss"
+            "loss": loss,
+         # optional for batch logging purposes
+            "log": logs,
+            "pred": pred,
+        }
+        return batch_dictionary
+
+    def test_step(self, batch, batch_idx):
+        pred, loss, acc, iou = self._shared_eval_step(batch, batch_idx)
+        self.log("val_loss", loss)
+        self.log("val_iou", iou)
+        logs = {"train_loss": loss, "accuracy": acc, "iou": iou}
+        batch_dictionary = {
+         # REQUIRED: It ie required for us to return "loss"
+            "loss": loss,
+         # optional for batch logging purposes
+            "log": logs,
+         # "pred": pred,
+        }
+        return batch_dictionary
+
+    def _shared_eval_step(self, batch, batch_idx):
+        x, y = batch
+        y_hat = self(x)
+        loss = self.loss_fn(y_hat, y)
+        y = y.int()
+        acc = accuracy(y_hat, y)
+        _iou = iou(y_hat, y, num_classes=2)
+
+        return y_hat, loss, acc, _iou
 #
 # def validation_epoch_end(self, validation_step_outputs):
 #     dict = {}
