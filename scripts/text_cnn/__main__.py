@@ -1,13 +1,17 @@
 import os
 import torch
 from torch import nn
-from pytorch_lightning import Trainer
+from torch.optim import Adam
 from torch.utils.data import DataLoader
 
-from pl_network import PytorchLightningModule
-from data_module import DataModule
+import time
 
-from pytorch_lightning.loggers import TensorBoardLogger
+from sentence_transformers import SentenceTransformer
+from data_set import SentenceDataset
+from preprocess import preprocess_data
+from text_cnn import TextCnn
+from train import train, validate
+
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 device_pl = "gpu" if device == "cuda" else device
@@ -35,7 +39,7 @@ preprocess = True
 
 # training parameters
 batch_size = 1
-epochs = 3
+epochs = 1
 
 loss_fn = nn.BCELoss(reduction='mean').to(device)
 
@@ -67,18 +71,51 @@ if os.path.exists(checkpoint_dir):
             checkpoint = checkpoints[0]
 print(checkpoint)
 
-logger = TensorBoardLogger(log_path, name=log_name)
-if checkpoint is not None:
-    model = PytorchLightningModule.load_from_checkpoint(checkpoint, loss_fn=loss_fn, device=device)
-    trainer = Trainer(logger=logger, resume_from_checkpoint=checkpoint, callbacks=[], gpus=1)
-else:
-    model = PytorchLightningModule(loss_fn=loss_fn, device=device)
-    trainer = Trainer(logger=logger, callbacks=[], gpus=1)
+"""
+---------------------------------------------------------------------
+|                                                                   |
+|                     data loader                                   |
+|                                                                   |
+---------------------------------------------------------------------
+"""
 
-module = DataModule(data_path, CSV_PATH, base_path, evaluation_ratio, test_ratio, batch_size)
+bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
+bert.max_seq_length = 512
+
+training_sentences_1, training_sentences_2, training_scores, training_ids, \
+evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, evaluation_ids, \
+test_sentences_1, test_sentences_2, test_scores_normalized, test_scores_raw, test_ids \
+            = preprocess_data(data_path, CSV_PATH, base_path, bert, create_test_set=True,
+                              validation_ratio=evaluation_ratio, test_ratio=test_ratio)
+
+print(f"Finished reading the data!\n# training sentence pairs: {len(training_sentences_1)}\n"
+              f"# evaluation sentence pairs: {len(evaluation_sentences_1)}\n"
+              f"# test sentence pairs: {len(test_sentences_1)}")
+train_ds = SentenceDataset(training_sentences_1, training_sentences_2, training_scores, bert)
+val_ds = SentenceDataset(evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, bert)
+test_ds = SentenceDataset(test_sentences_1, test_sentences_2, test_scores_normalized, bert)
+
+
+train_dl = DataLoader(train_ds, shuffle=True, batch_size=batch_size)
+val_dl = DataLoader(val_ds, shuffle=False, batch_size=batch_size)
+test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size)
+
+network = TextCnn(loss_fn, device)
+optimizer = Adam(network.parameters(), 1e-3)
+
 print("Start training model!")
-trainer.fit(model, module)
-print("Finished training model!")
 
+for t in range(epochs):
+    start = time.time()
+    print(f"Epoch {t + 1}\n-------------------------------")
+    train(network, loss_fn, optimizer, device, train_dl)
+    print(f"Validation {t + 1}\n-------------------------------")
+    validate(network, device, val_dl, save_predictions=False)
+    end = time.time()
+    print(f"Epoch{t + 1} duration was {end - start}\n\n")
+
+print("Finished training model!")
+print("Start testing...")
+validate(network, device, test_dl, save_predictions=True, ids=test_ids, result_path=os.path.join(log_path,"predictions.csv"))
 # trainer.test(model, module)
 print("Done!")
