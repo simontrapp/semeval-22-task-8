@@ -5,6 +5,7 @@ import random
 from util import lable2ohe, process_json_to_sentences
 import nltk
 from tqdm import tqdm
+import sys
 
 nltk.download('punkt')
 
@@ -36,7 +37,7 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
     if not ids_exist:
         print("Starting reading the data")
         sentence_pairs = pandas.read_csv(csv_path)
-        pbar = tqdm(sentence_pairs.iterrows(), total=sentence_pairs.shape[0])
+        pbar = tqdm(sentence_pairs.iterrows(), total=sentence_pairs.shape[0], file=sys.stdout)
         for index, row in pbar:
             pbar.set_description("Preprocessing Data")
             pair_id = row['pair_id']
@@ -100,7 +101,7 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
 def load_sentences(pair_ids, data_path, description=""):
     s_1 = []
     s_2 = []
-    pbar = tqdm(pair_ids)
+    pbar = tqdm(pair_ids, file=sys.stdout)
     for id in pbar:
         pbar.set_description(description)
         pair_ids = id.split('_')
