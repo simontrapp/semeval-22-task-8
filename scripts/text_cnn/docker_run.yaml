@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: tcnn-reg
+  name: tcnn-reg-title
   namespace: studheinickel
 spec:
   template:
@@ -18,7 +18,7 @@ spec:
                       - ancalagon
       containers:
         - name: text-cnn
-          image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/text-cnn:0.0.2
+          image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/text-cnn:0.0.4
           imagePullPolicy: "Always"
           resources:
             limits:

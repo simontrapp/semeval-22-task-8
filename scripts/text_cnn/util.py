@@ -14,6 +14,8 @@ def process_json_to_sentences(path: str):
         res = []
         article_data = json.load(file)
         title = article_data['title']
+        if title is not None and title.strip() != "":
+            res.append(title)
         text = article_data['text']
 
         if text is not None and text.strip() != "":
