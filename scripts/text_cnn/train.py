@@ -5,6 +5,7 @@ from tqdm import tqdm
 from torchmetrics.functional import accuracy, iou
 import sys
 from torch.utils.tensorboard import SummaryWriter
+import numpy as np
 
 
 def _shared_eval_step(self, batch, batch_idx):
@@ -25,6 +26,7 @@ def train(model, loss_fn, optimizer, device, train_dataloader, epoch=0, result_p
     pbar = tqdm(train_dataloader, file=sys.stdout)
     for batch_index, (X, y) in enumerate(pbar):
         pbar.set_description(f"Train epoch {epoch}")
+        sys.stdout.flush()
         X, y = X.to(device), y.to(device)
         pred = model(X)
         loss = loss_fn(pred, y)
@@ -42,11 +44,14 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
     num_batches = math.ceil(size / dataloader.batch_size)
     p = None
     l = None
+    acc = np.zeros(num_batches)
     pbar = tqdm(dataloader, file=sys.stdout)
     for batch_index, (X, y) in enumerate(pbar):
         pbar.set_description(pbar_description)
-        X = X.to(device)
+        sys.stdout.flush()
+        X,y = X.to(device), y.to(device)
         pred = model(X).detach()
+        acc[batch_index] = accuracy(pred, y.int()).detach().numpy()
         if p is None:
             p = pred
             l = y
@@ -56,7 +61,7 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
 
     p = torch.argmax(p, dim=1).detach()
     l = torch.argmax(l, dim=1).detach()
-    acc = accuracy(p, l)
+    acc = np.average(acc)
     print(f"accuracy: {acc}")
 
     if save_predictions:
