@@ -24,7 +24,7 @@ print("Using {} device".format(device))
 |                                                                   |
 ---------------------------------------------------------------------
 """
-log_path = os.path.join("..", "..", "logs", "tcnn-reg")
+log_path = os.path.join("..", "..", "logs", "tcnn-reg-title")
 log_path_tb = os.path.join(log_path, "tb_logs")
 log_name = "text_cnn"
 base_path = os.path.join("..", "..", "data")
@@ -38,8 +38,8 @@ test_ratio = 0.2  # ~20% of pairs for testing if desired
 preprocess = True
 
 # training parameters
-batch_size = 2
-epochs = 20
+batch_size = 4
+epochs = 50
 
 """
 ---------------------------------------------------------------------
