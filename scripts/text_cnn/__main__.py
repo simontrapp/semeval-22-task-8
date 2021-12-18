@@ -70,10 +70,10 @@ print(checkpoint)
 logger = TensorBoardLogger(log_path, name=log_name)
 if checkpoint is not None:
     model = PytorchLightningModule.load_from_checkpoint(checkpoint, loss_fn=loss_fn, device=device)
-    trainer = Trainer(logger=logger, resume_from_checkpoint=checkpoint)
+    trainer = Trainer(logger=logger, ckpt_path=checkpoint, gpus=1)
 else:
     model = PytorchLightningModule(loss_fn=loss_fn, device=device)
-    trainer = Trainer(logger=logger)
+    trainer = Trainer(logger=logger, gpus=1)
 
 module = DataModule(data_path, CSV_PATH, base_path, evaluation_ratio, test_ratio, batch_size)
 print("Start training model!")
