@@ -49,9 +49,9 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
     for batch_index, (X, y) in enumerate(pbar):
         pbar.set_description(pbar_description)
         sys.stdout.flush()
-        X,y = X.to(device), y.to(device)
+        X = X.to(device) #X,y = X.to(device), y.to(device)
         pred = model(X).detach()
-        acc[batch_index] = accuracy(pred, y.int()).detach().numpy()
+        #acc[batch_index] = accuracy(pred, y.int()).detach().numpy()
         if p is None:
             p = pred
             l = y
@@ -61,7 +61,7 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
 
     p = torch.argmax(p, dim=1).detach()
     l = torch.argmax(l, dim=1).detach()
-    acc = np.average(acc)
+    acc = accuracy(p, l.int())
     print(f"accuracy: {acc}")
 
     if save_predictions:
