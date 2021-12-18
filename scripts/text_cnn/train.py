@@ -6,6 +6,8 @@ from torchmetrics.functional import accuracy, iou
 import sys
 from torch.utils.tensorboard import SummaryWriter
 import numpy as np
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+from scipy.stats import pearsonr
 
 
 def _shared_eval_step(self, batch, batch_idx):
@@ -25,12 +27,14 @@ def train(model, loss_fn, optimizer, device, train_dataloader, epoch=0, result_p
     num_batches = math.ceil(size / train_dataloader.batch_size)
     model.train()
     pbar = tqdm(train_dataloader, file=sys.stdout)
+    la = np.zeros(num_batches)
     for batch_index, (X, y) in enumerate(pbar):
         pbar.set_description(f"Train epoch {epoch}")
         sys.stdout.flush()
         X, y = X.to(device), y.to(device)
         pred = model(X)
         loss = loss_fn(pred, y)
+        la[batch_index] = loss
         writer.add_scalar("Loss/train", loss, batch_index)
         optimizer.zero_grad()
         loss.backward()
@@ -39,35 +43,37 @@ def train(model, loss_fn, optimizer, device, train_dataloader, epoch=0, result_p
             print("")
     writer.flush()
     writer.close()
+    print(f"Epoch loss is {np.average(la)}")
 
 
 def validate(model, device, dataloader, result_path=None, save_predictions=False, ids=None, pbar_description=""):
     model.eval()
     size = len(dataloader.dataset)
     num_batches = math.ceil(size / dataloader.batch_size)
-    p = None
-    l = None
-    acc = np.zeros(num_batches)
+    p = []
+    l = []
+    mse = np.zeros(num_batches)
+    pears = np.zeros(num_batches)
     pbar = tqdm(dataloader, file=sys.stdout)
     for batch_index, (X, y) in enumerate(pbar):
         pbar.set_description(pbar_description)
         sys.stdout.flush()
         X, y = X.to(device), y.to(device)
         pred = model(X).detach()
-        acc[batch_index] = accuracy(pred, y.int()).detach().cpu().numpy()
-        if p is None:
-            p = pred
-            l = y
-        else:
-            p = torch.cat((p, pred), dim=0)
-            l = torch.cat((l, y), dim=0)
-        if batch_index % 50 == 0:
+        p.extend(pred.detach())
+        l.extend(y.detach())
+        if batch_index % 20 == 0:
             print("")
 
-    p = torch.argmax(p, dim=1).detach()
-    l = torch.argmax(l, dim=1).detach()
-    acc = np.average(acc)
-    print(f"accuracy: {acc}")
+    p = [i.item() for i in p]
+    l = [i.item() for i in l]
+
+    mse = mean_squared_error(l,p)
+    pears = pearsonr(p,l)
+    mae = mean_absolute_error(l,p)
+    print(f"mse: {mse}")
+    print(f"pcc: {pears}")
+    print(f"mae: {mae}")
 
     if save_predictions:
-        pandas.DataFrame({'pair_id': ids, 'predictions': p.cpu().numpy().tolist()}).to_csv(result_path, index=False)
+        pandas.DataFrame({'pair_id': ids, 'predictions': p}).to_csv(result_path, index=False)

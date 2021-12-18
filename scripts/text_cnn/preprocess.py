@@ -36,7 +36,7 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
 
     if not ids_exist:
         print("Starting reading the data")
-        sentence_pairs = pandas.read_csv(csv_path)
+        sentence_pairs = pandas.read_csv(csv_path).iloc[:30]
         pbar = tqdm(sentence_pairs.iterrows(), total=sentence_pairs.shape[0], file=sys.stdout)
         for index, row in pbar:
             pbar.set_description("Preprocessing Data")
@@ -53,7 +53,7 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
                 sentence_2 = process_json_to_sentences(second_json_path)
                 if len(sentence_1) == 0 or len(sentence_2) == 0:
                     continue
-                score = lable2ohe(overall_score)
+                score = overall_score
                 r = random.random()
                 if r < validation_ratio:
                     evaluation_ids.append(pair_id)
