@@ -36,7 +36,7 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
 
     if not ids_exist:
         print("Starting reading the data")
-        sentence_pairs = pandas.read_csv(csv_path).iloc[:30]
+        sentence_pairs = pandas.read_csv(csv_path)
         pbar = tqdm(sentence_pairs.iterrows(), total=sentence_pairs.shape[0], file=sys.stdout)
         for index, row in pbar:
             pbar.set_description("Preprocessing Data")
