@@ -34,7 +34,7 @@ test_ratio = 0.2  # ~20% of pairs for testing if desired
 preprocess = True
 
 # training parameters
-batch_size = 4
+batch_size = 2
 epochs = 3
 
 loss_fn = nn.BCELoss(reduction='mean').to(device)

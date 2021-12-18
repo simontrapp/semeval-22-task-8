@@ -16,8 +16,6 @@ spec:
                     operator: NotIn
                     values:
                       - ancalagon
-      nodeSelector:
-        gputype: "a100"
       containers:
         - name: text-cnn
           image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/text-cnn:0.0.2
