@@ -34,6 +34,8 @@ def train(model, loss_fn, optimizer, device, train_dataloader, epoch=0, result_p
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        if batch_index % 50 ==0:
+            print("")
     writer.flush()
     writer.close()
 
@@ -49,19 +51,21 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
     for batch_index, (X, y) in enumerate(pbar):
         pbar.set_description(pbar_description)
         sys.stdout.flush()
-        X = X.to(device) #X,y = X.to(device), y.to(device)
+        X,y = X.to(device), y.to(device)
         pred = model(X).detach()
-        #acc[batch_index] = accuracy(pred, y.int()).detach().numpy()
+        acc[batch_index] = accuracy(pred, y.int()).detach().numpy()
         if p is None:
             p = pred
             l = y
         else:
             p = torch.cat((p, pred), dim=0)
             l = torch.cat((l, y), dim=0)
+        if batch_index % 50 ==0:
+            print("")
 
     p = torch.argmax(p, dim=1).detach()
     l = torch.argmax(l, dim=1).detach()
-    acc = accuracy(p, l.int())
+    acc = np.average(acc)
     print(f"accuracy: {acc}")
 
     if save_predictions:
