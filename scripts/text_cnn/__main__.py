@@ -3,6 +3,7 @@ import torch
 from torch import nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
+from torchsummary import summary
 
 import time
 
@@ -98,6 +99,7 @@ test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size)
 
 loss_fn = nn.BCELoss(reduction='mean').to(device)
 network = TextCnn(loss_fn, device).to(device)
+summary(network,(2,20,512))
 optimizer = Adam(network.parameters(), 1e-3)
 
 print("Start training model!")
