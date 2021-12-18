@@ -70,4 +70,4 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
     print(f"accuracy: {acc}")
 
     if save_predictions:
-        pandas.DataFrame({'pair_id': ids, 'predictions': p.numpy().tolist()}).to_csv(result_path, index=False)
+        pandas.DataFrame({'pair_id': ids, 'predictions': p.cpu().numpy().tolist()}).to_csv(result_path, index=False)
