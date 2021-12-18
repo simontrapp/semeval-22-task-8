@@ -15,21 +15,21 @@ from util import MaxOverTimePooling
 
 class PytorchLightningModule(LightningModule):
     def __init__(self, loss_fn, device="cuda"):
-        super(PytorchLightningModule,self).__init__()
+        super(PytorchLightningModule, self).__init__()
 
         self.loss_fn = loss_fn
         self.network_1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=100, kernel_size=(3, 3), bias=False),
+            DepthWiseSeperable(in_channels=1, filters=100),
             nn.ReLU6(),
-            nn.Conv2d(in_channels=100, out_channels=200, kernel_size=(3, 3), bias=False),
+            DepthWiseSeperable(in_channels=100, filters=200),
             nn.Dropout(0.2),
             nn.ReLU6(),
             MaxOverTimePooling()
         )
         self.network_2 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=100, kernel_size=(3, 3), bias=False),
+            DepthWiseSeperable(in_channels=1, filters=100),
             nn.ReLU6(),
-            nn.Conv2d(in_channels=100, out_channels=200, kernel_size=(3, 3), bias=False),
+            DepthWiseSeperable(in_channels=100, filters=200),
             nn.Dropout(0.2),
             nn.ReLU6(),
             MaxOverTimePooling()
@@ -45,9 +45,9 @@ class PytorchLightningModule(LightningModule):
 
     def forward(self, x):
         x_1 = x[:, 0, :, :]
-        x_1 = self.network_1(x_1.resize(x_1.size()[0],1, *x_1.size()[-2:]))
+        x_1 = self.network_1(x_1.resize(x_1.size()[0], 1, *x_1.size()[-2:]))
         x_2 = x[:, 1, :, :]
-        x_2 = self.network_2(x_2.resize(x_2.size()[0],1, *x_2.size()[-2:]))
+        x_2 = self.network_2(x_2.resize(x_2.size()[0], 1, *x_2.size()[-2:]))
         x = torch.cat((x_1, x_2), dim=1).resize(x_1.size()[0], 400)
         return self.final_network(x)
 
@@ -136,16 +136,40 @@ class PytorchLightningModule(LightningModule):
     #
     # def test_epoch_end(self, validation_step_outputs):
     #     dict = {}
-        # lenght = len(validation_step_outputs)
-        # pred = [torch.argmax(step['pred'], dim=1) for step in validation_step_outputs]
-        # pred = torch.concat(pred, dim=0) if len(pred) > 1 else pred[0]
-        # csv = pandas.read_csv(os.path.join("..", "..", "data", "embeddings", "test_ids.csv"), index_col=False)
-        # #csv['predictions'] = pred
-        # df = pandas.DataFrame({'predictions':pred, 'pair_id': csv['pair_id'].to_list()})
-        #
-        # df.to_csv(os.path.join("..", "..", "logs", "predictions.csv"), index=False)
-        #
-        # for key in validation_step_outputs[0]["log"]:
-        #     dict[key] = np.sum([x["log"][key].cpu().numpy() for x in validation_step_outputs]) / lenght
-        #
-        # return dict
+    # lenght = len(validation_step_outputs)
+    # pred = [torch.argmax(step['pred'], dim=1) for step in validation_step_outputs]
+    # pred = torch.concat(pred, dim=0) if len(pred) > 1 else pred[0]
+    # csv = pandas.read_csv(os.path.join("..", "..", "data", "embeddings", "test_ids.csv"), index_col=False)
+    # #csv['predictions'] = pred
+    # df = pandas.DataFrame({'predictions':pred, 'pair_id': csv['pair_id'].to_list()})
+    #
+    # df.to_csv(os.path.join("..", "..", "logs", "predictions.csv"), index=False)
+    #
+    # for key in validation_step_outputs[0]["log"]:
+    #     dict[key] = np.sum([x["log"][key].cpu().numpy() for x in validation_step_outputs]) / lenght
+    #
+    # return dict
+
+
+class DepthWiseSeperable(nn.Module):
+    def __init__(self, in_channels,  filters):
+        super(DepthWiseSeperable, self).__init__()
+
+        layers = []
+
+        # Depthwise
+        layers.append(
+            nn.Conv2d(in_channels=in_channels, out_channels=in_channels, kernel_size=3, groups=in_channels,
+                      bias=False))
+        layers.append(nn.ReLU6())
+
+        # Pointwise
+        layers.append(
+            nn.Conv2d(in_channels=in_channels, out_channels=filters, kernel_size=1,
+                      bias=False))
+
+        self.layers = nn.Sequential(*layers)
+
+    def forward(self, x):
+        out = self.layers(x)
+        return out
