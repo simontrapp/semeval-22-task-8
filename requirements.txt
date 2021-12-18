@@ -13,3 +13,4 @@ tensorflow_text
 
 pytorch-lightning
 tensorboard
+tqdm
