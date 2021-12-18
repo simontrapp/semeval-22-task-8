@@ -11,13 +11,17 @@ import numpy as np
 
 def process_json_to_sentences(path: str):
     with open(path, 'r') as file:
+        res = []
         article_data = json.load(file)
         title = article_data['title']
-        text_sentences = nltk.sent_tokenize(article_data['text'])
-        res = []
+        text = article_data['text']
+
+        if text is not None and text.strip() != "":
+            text_sentences = nltk.sent_tokenize(article_data['text'])
+            res.extend(text_sentences)
+
         # if len(title) > 0:
         #     res.append(title)
-        res.extend(text_sentences)
         # if len(res) == 0:
         #   print(article_data['text'], article_data)
         #   raise Exception()

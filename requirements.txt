@@ -8,5 +8,5 @@ scikit-learn
 gensim
 joblib
 scipy
-pytorch-lightning
 tensorboard
+tqdm
