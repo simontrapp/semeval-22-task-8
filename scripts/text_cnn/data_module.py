@@ -33,7 +33,7 @@ class DataModule(pl.LightningDataModule):
         print(f"Finished reading the data!\n# training sentence pairs: {len(training_sentences_1)}\n"
               f"# evaluation sentence pairs: {len(evaluation_sentences_1)}\n"
               f"# test sentence pairs: {len(test_sentences_1)}")
-        self.train_ds = SentenceDataset(training_sentences_1,training_sentences_2, training_scores, bert)
+        self.train_ds = SentenceDataset(training_sentences_1, training_sentences_2, training_scores, bert)
         self.val_ds = SentenceDataset(evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, bert)
         self.test_ds = SentenceDataset(test_sentences_1, test_sentences_2, test_scores_normalized, bert)
 
