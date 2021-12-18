@@ -24,7 +24,7 @@ print("Using {} device".format(device))
 |                                                                   |
 ---------------------------------------------------------------------
 """
-log_path = os.path.join("..", "..", "logs")
+log_path = os.path.join("..", "..", "logs", "tcnn-reg")
 log_path_tb = os.path.join(log_path, "tb_logs")
 log_name = "text_cnn"
 base_path = os.path.join("..", "..", "data")
@@ -81,8 +81,8 @@ bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
 bert.max_seq_length = 512
 
 training_sentences_1, training_sentences_2, training_scores, training_ids, \
-    evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, evaluation_ids, \
-    test_sentences_1, test_sentences_2, test_scores_normalized, test_scores_raw, test_ids \
+evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, evaluation_ids, \
+test_sentences_1, test_sentences_2, test_scores_normalized, test_scores_raw, test_ids \
     = preprocess_data(data_path, CSV_PATH, base_path, create_test_set=True, validation_ratio=evaluation_ratio,
                       test_ratio=test_ratio)
 
@@ -99,7 +99,7 @@ test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size)
 
 loss_fn = nn.MSELoss().to(device)
 network = TextCnn(loss_fn, device).to(device)
-summary(network,(2,40 ,512))
+summary(network, (2, 40, 512))
 optimizer = Adam(network.parameters(), 1e-3)
 
 print("Start training model!")
