@@ -73,3 +73,5 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
 
     if save_predictions:
         pandas.DataFrame({'pair_id': ids, 'predictions': p}).to_csv(result_path, index=False)
+
+    return mse

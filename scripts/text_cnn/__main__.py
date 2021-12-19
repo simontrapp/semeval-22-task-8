@@ -32,16 +32,18 @@ base_path = os.path.join("..", "..", "data")
 data_path = os.path.join(base_path, "processed", "training_data")
 CSV_PATH = os.path.join(base_path, "semeval-2022_task8_train-data_batch.csv")
 
-evaluation_ratio = 0.2  # ~20% of pairs for evaluation
-create_test_set = True
+evaluation_ratio = 0.3  # ~20% of pairs for evaluation
+create_test_set = False
 test_ratio = 0.2  # ~20% of pairs for testing if desired
 
 preprocess = True
 
 # training parameters
-batch_size = 4
-epochs = 50
+batch_size = 2
+epochs = 100
+lr = 0.005
 
+es_epochs = 20
 """
 ---------------------------------------------------------------------
 |                                                                   |
@@ -101,16 +103,29 @@ test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size)
 loss_fn = nn.MSELoss().to(device)
 network = TextCnn(loss_fn, device).to(device)
 summary(network, (2, 40, 512))
-optimizer = Adam(network.parameters(), 0.001)
+optimizer = Adam(network.parameters(), lr=lr)
 
 print("Start training model!")
 
 writer = SummaryWriter(os.path.join(log_path, "tb_logs"))
 
+best_metric = float('inf')
+best_index = 0
+epochs_not_improved = 0
 for t in range(epochs):
     start = time.time()
     train(network, loss_fn, optimizer, device, train_dl, writer, epoch=t)
-    validate(network, device, val_dl, save_predictions=False, pbar_description=f"Validate epoch {t}")
+    metric = validate(network, device, val_dl, save_predictions=True,
+                      result_path=os.path.join(log_path, f"predictions_epoch_{t}.csv"),
+                      pbar_description=f"Validate epoch {t}")
+    if metric >= best_metric:
+        epochs_not_improved += 1
+        if epochs_not_improved >= es_epochs:
+            break
+    else:
+        best_index = t
+        best_metric = metric
+        epochs_not_improved = 0
     end = time.time()
 
 writer.flush()
@@ -118,7 +133,11 @@ writer.close()
 
 print("Finished training model!")
 print("Start testing...")
-validate(network, device, test_dl, save_predictions=True, ids=test_ids,
-         result_path=os.path.join(log_path, "predictions.csv"), pbar_description="Test network")
+validate(network, device, val_dl, save_predictions=True, ids=test_ids,
+         result_path=os.path.join(log_path, "predictions_train.csv"),
+         pbar_description="Test network with train data set")
+validate(network, device, val_dl, save_predictions=True, ids=test_ids,
+         result_path=os.path.join(log_path, "predictions_test.csv"),
+         pbar_description="Test network with validation data set")
 # trainer.test(model, module)
 print("Done!")
