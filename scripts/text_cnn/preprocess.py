@@ -2,7 +2,7 @@ import numpy as np
 import os
 import pandas
 import random
-from util import lable2ohe, process_json_to_sentences
+from util import lable2ohe, process_json_to_sentences,normalize_score
 import nltk
 from tqdm import tqdm
 import sys
@@ -53,7 +53,7 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
                 sentence_2 = process_json_to_sentences(second_json_path)
                 if len(sentence_1) == 0 or len(sentence_2) == 0:
                     continue
-                score = overall_score
+                score = normalize_score(overall_score)
                 r = random.random()
                 if r < validation_ratio:
                     evaluation_ids.append(pair_id)
