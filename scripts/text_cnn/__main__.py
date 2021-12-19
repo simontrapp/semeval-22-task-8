@@ -25,7 +25,7 @@ print("Using {} device".format(device))
 |                                                                   |
 ---------------------------------------------------------------------
 """
-log_path = os.path.join("..", "..", "logs", "tcnn-reg-title-sigmoid")
+log_path = os.path.join("..", "..", "logs", "tcnn-reg-title-sigmoid-lr0-01")
 log_path_tb = os.path.join(log_path, "tb_logs")
 log_name = "text_cnn_sigmoid"
 base_path = os.path.join("..", "..", "data")
@@ -101,7 +101,7 @@ test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size)
 loss_fn = nn.MSELoss().to(device)
 network = TextCnn(loss_fn, device).to(device)
 summary(network, (2, 40, 512))
-optimizer = Adam(network.parameters(), 1e-3)
+optimizer = Adam(network.parameters(), 0.01)
 
 print("Start training model!")
 
