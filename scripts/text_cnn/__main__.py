@@ -115,7 +115,7 @@ epochs_not_improved = 0
 for t in range(epochs):
     start = time.time()
     train(network, loss_fn, optimizer, device, train_dl, writer, epoch=t)
-    metric = validate(network, device, val_dl, save_predictions=True,
+    metric = validate(network, device, train_dl, save_predictions=True,
                       result_path=os.path.join(log_path, f"predictions_epoch_{t}.csv"),
                       pbar_description=f"Validate epoch {t}")
     if metric >= best_metric:
@@ -133,7 +133,7 @@ writer.close()
 
 print("Finished training model!")
 print("Start testing...")
-validate(network, device, val_dl, save_predictions=True, ids=training_ids,
+validate(network, device, val_dl, save_predictions=True,
          result_path=os.path.join(log_path, "predictions_train.csv"),
          pbar_description="Test network with train data set")
 validate(network, device, val_dl, save_predictions=True, ids=test_ids,
