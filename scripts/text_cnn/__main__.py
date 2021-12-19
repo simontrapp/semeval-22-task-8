@@ -39,8 +39,8 @@ test_ratio = 0.2  # ~20% of pairs for testing if desired
 preprocess = True
 
 # training parameters
-batch_size = 2
-epochs = 100
+batch_size = 4
+epochs = 200
 lr = 0.0005
 
 es_epochs = 20
@@ -115,7 +115,7 @@ epochs_not_improved = 0
 for t in range(epochs):
     start = time.time()
     train(network, loss_fn, optimizer, device, train_dl, writer, epoch=t)
-    metric = validate(network, device, train_dl, save_predictions=True,
+    metric = validate(network, device, val_dl, save_predictions=True,
                       result_path=os.path.join(log_path, f"predictions_epoch_{t}.csv"),
                       pbar_description=f"Validate epoch {t}")
     if metric >= best_metric:
@@ -131,12 +131,12 @@ for t in range(epochs):
 writer.flush()
 writer.close()
 
-print("Finished training model!")
+print(f"Finished training model! Best loss was {best_metric} at epoch index {best_index}")
 print("Start testing...")
-validate(network, device, val_dl, save_predictions=True,
+validate(network, device, train_dl, save_predictions=True, ids=training_ids,
          result_path=os.path.join(log_path, "predictions_train.csv"),
          pbar_description="Test network with train data set")
-validate(network, device, val_dl, save_predictions=True, ids=test_ids,
+validate(network, device, val_dl, save_predictions=True, ids=evaluation_ids,
          result_path=os.path.join(log_path, "predictions_test.csv"),
          pbar_description="Test network with validation data set")
 # trainer.test(model, module)
