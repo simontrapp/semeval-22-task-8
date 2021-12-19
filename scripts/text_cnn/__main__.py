@@ -133,7 +133,7 @@ writer.close()
 
 print("Finished training model!")
 print("Start testing...")
-validate(network, device, val_dl, save_predictions=True, ids=test_ids,
+validate(network, device, val_dl, save_predictions=True, ids=training_ids,
          result_path=os.path.join(log_path, "predictions_train.csv"),
          pbar_description="Test network with train data set")
 validate(network, device, val_dl, save_predictions=True, ids=test_ids,
