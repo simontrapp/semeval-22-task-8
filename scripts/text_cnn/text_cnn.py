@@ -48,6 +48,7 @@ class TextCnn(nn.Module):
             nn.Dropout(0.2),
             nn.ReLU6(),
             nn.Linear(in_features=100, out_features=1, bias=False),
+            nn.Sigmoid()
             #nn.Softmax(dim=1)
         )
 

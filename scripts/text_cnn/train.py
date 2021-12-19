@@ -4,7 +4,6 @@ import pandas
 from tqdm import tqdm
 from torchmetrics.functional import accuracy, iou
 import sys
-from torch.utils.tensorboard import SummaryWriter
 import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from scipy.stats import pearsonr
@@ -21,8 +20,7 @@ def _shared_eval_step(self, batch, batch_idx):
     return y_hat, loss, acc, _iou
 
 
-def train(model, loss_fn, optimizer, device, train_dataloader, epoch=0, result_path=None):
-    writer = SummaryWriter("../../logs/tb_logs/text-cnn")
+def train(model, loss_fn, optimizer, device, train_dataloader, writer,epoch=0, result_path=None):
     size = len(train_dataloader.dataset)
     num_batches = math.ceil(size / train_dataloader.batch_size)
     model.train()
@@ -41,8 +39,6 @@ def train(model, loss_fn, optimizer, device, train_dataloader, epoch=0, result_p
         optimizer.step()
         if batch_index % 20 == 0:
             print("")
-    writer.flush()
-    writer.close()
     print(f"Epoch loss is {np.average(la)}")
 
 

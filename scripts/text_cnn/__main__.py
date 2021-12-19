@@ -4,6 +4,7 @@ from torch import nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
 from torchsummary import summary
+from torch.utils.tensorboard import SummaryWriter
 
 import time
 
@@ -24,9 +25,9 @@ print("Using {} device".format(device))
 |                                                                   |
 ---------------------------------------------------------------------
 """
-log_path = os.path.join("..", "..", "logs", "tcnn-reg-title")
+log_path = os.path.join("..", "..", "logs", "tcnn-reg-title-sigmoid")
 log_path_tb = os.path.join(log_path, "tb_logs")
-log_name = "text_cnn"
+log_name = "text_cnn_sigmoid"
 base_path = os.path.join("..", "..", "data")
 data_path = os.path.join(base_path, "processed", "training_data")
 CSV_PATH = os.path.join(base_path, "semeval-2022_task8_train-data_batch.csv")
@@ -104,11 +105,16 @@ optimizer = Adam(network.parameters(), 1e-3)
 
 print("Start training model!")
 
+writer = SummaryWriter(os.path.join(log_path, "tb_logs"))
+
 for t in range(epochs):
     start = time.time()
-    train(network, loss_fn, optimizer, device, train_dl, epoch=t)
+    train(network, loss_fn, optimizer, device, train_dl, writer, epoch=t)
     validate(network, device, val_dl, save_predictions=False, pbar_description=f"Validate epoch {t}")
     end = time.time()
+
+writer.flush()
+writer.close()
 
 print("Finished training model!")
 print("Start testing...")
