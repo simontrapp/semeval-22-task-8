@@ -34,14 +34,14 @@ CSV_PATH = os.path.join(base_path, "semeval-2022_task8_train-data_batch.csv")
 
 evaluation_ratio = 0.3  # ~20% of pairs for evaluation
 create_test_set = False
-test_ratio = 0.2  # ~20% of pairs for testing if desired
+test_ratio = 0.01  # ~20% of pairs for testing if desired
 
 preprocess = True
 
 # training parameters
 batch_size = 4
 epochs = 200
-lr = 0.0005
+lr = 0.0001
 
 es_epochs = 20
 """
