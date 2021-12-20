@@ -33,7 +33,7 @@ def train(model, loss_fn, optimizer, device, train_dataloader, writer,epoch=0, r
         X, y = X.to(device), y.to(device)
         pred = model(X)
         loss = loss_fn(pred, y)
-        la[batch_index] = loss
+        la[batch_index] = loss.detach().cpu()
         writer.add_scalar("Loss/train", loss, batch_index+epoch*num_batches)
         optimizer.zero_grad()
         loss.backward()
