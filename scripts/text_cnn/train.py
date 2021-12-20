@@ -7,6 +7,7 @@ import sys
 import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from scipy.stats import pearsonr
+from util import unnormalize_scores
 
 
 def _shared_eval_step(self, batch, batch_idx):
@@ -61,8 +62,8 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
         if batch_index % 20 == 0:
             print("")
 
-    p = [i.item() for i in p]
-    l = [i.item() for i in l]
+    p = unnormalize_scores([i.item() for i in p])
+    l = unnormalize_scores([i.item() for i in l])
 
     mse = mean_squared_error(l,p)
     pears = pearsonr(p,l)
