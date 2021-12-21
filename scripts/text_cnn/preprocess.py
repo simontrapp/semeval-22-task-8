@@ -2,7 +2,7 @@ import numpy as np
 import os
 import pandas
 import random
-from util import lable2ohe, process_json_to_sentences,normalize_score
+from util import lable2ohe, process_json_to_sentences, normalize_score
 import nltk
 from tqdm import tqdm
 import sys
@@ -53,6 +53,9 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
                 sentence_2 = process_json_to_sentences(second_json_path)
                 if len(sentence_1) == 0 or len(sentence_2) == 0:
                     continue
+                if (len(sentence_1) > 100) or (len(sentence_2) > 100):
+                    continue
+
                 score = normalize_score(overall_score)
                 r = random.random()
                 if r < validation_ratio:
@@ -87,9 +90,11 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
         test_scores_normalized = np.load(test_scores_normalized_out, allow_pickle=True)
         test_scores_raw = np.load(test_scores_raw_out, allow_pickle=True)
 
-    training_sentences_1, training_sentences_2 = load_sentences(training_ids, data_dir, description="Load train sentences")
+    training_sentences_1, training_sentences_2 = load_sentences(training_ids, data_dir,
+                                                                description="Load train sentences")
 
-    evaluation_sentences_1, evaluation_sentences_2 = load_sentences(evaluation_ids, data_dir, description="Load validation sentences")
+    evaluation_sentences_1, evaluation_sentences_2 = load_sentences(evaluation_ids, data_dir,
+                                                                    description="Load validation sentences")
 
     test_sentences_1, test_sentences_2 = load_sentences(test_ids, data_dir, description="Load test sentences")
 

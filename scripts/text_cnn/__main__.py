@@ -9,7 +9,7 @@ from torch.utils.tensorboard import SummaryWriter
 import time
 
 from sentence_transformers import SentenceTransformer
-from data_set import SentenceDataset
+from data_set import SentenceDataset, my_collate
 from preprocess import preprocess_data
 from text_cnn import TextCnn
 from train import train, validate
@@ -41,9 +41,10 @@ preprocess = True
 # training parameters
 batch_size = 32
 epochs = 200
-lr = 0.00001
+lr = 0.00005
 
 es_epochs = 20
+bert_embedding_size = 128
 """
 ---------------------------------------------------------------------
 |                                                                   |
@@ -96,9 +97,9 @@ train_ds = SentenceDataset(training_sentences_1, training_sentences_2, training_
 val_ds = SentenceDataset(evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, bert)
 test_ds = SentenceDataset(test_sentences_1, test_sentences_2, test_scores_normalized, bert)
 
-train_dl = DataLoader(train_ds, shuffle=True, batch_size=batch_size)
-val_dl = DataLoader(val_ds, shuffle=False, batch_size=batch_size)
-test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size)
+train_dl = DataLoader(train_ds, shuffle=True, batch_size=batch_size, collate_fn=my_collate)
+val_dl = DataLoader(val_ds, shuffle=False, batch_size=batch_size, collate_fn=my_collate)
+test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size, collate_fn=my_collate)
 
 loss_fn = nn.MSELoss().to(device)
 network = TextCnn(loss_fn, device).to(device)

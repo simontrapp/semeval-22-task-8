@@ -8,8 +8,6 @@ class SentenceDataset(Dataset):
 
     def __init__(self, sentences_1, sentences_2, label, encoder):
         super(SentenceDataset, self).__init__()
-        max_1, max_2 = np.max([len(s) for s in sentences_1]), np.max([len(s) for s in sentences_2])
-        self.max = max(np.max([max_1,max_2]), 16)
         self.sentences_1 = sentences_1
         self.sentences_2 = sentences_2
         self.labels = label
@@ -21,9 +19,23 @@ class SentenceDataset(Dataset):
 
     def __getitem__(self, idx):
         e1 = self.encoder.encode(self.sentences_1[idx])
-        e1 = np.concatenate((e1, np.zeros((self.max - e1.shape[0], e1.shape[1]))))
         e2 = self.encoder.encode(self.sentences_2[idx])
-        e2 = np.concatenate((e2, np.zeros((self.max - e2.shape[0], e2.shape[1]))))
-        embedding = np.array([e1,e2])
+        m = max(e1.shape[0], e2.shape[0])
+        if e1.shape[0] < m:
+            e1 = np.concatenate((e1, np.zeros((m - e1.shape[0], e1.shape[1]))))
+        if e2.shape[0] < m:
+            e2 = np.concatenate((e2, np.zeros((m - e2.shape[0], e2.shape[1]))))
+
+        embedding = np.array([e1, e2])
         label = self.labels[idx]
         return torch.Tensor(embedding), torch.Tensor([label]).float()
+
+
+def my_collate(batch):
+    data = [item[0].numpy() for item in batch]
+    m = np.max([x.shape[1] for x in data])
+    padded = [np.concatenate((x, np.zeros((x.shape[0], m - x.shape[1], x.shape[2]))), axis=1) for x in data]
+    padded = torch.Tensor(np.array(padded))
+    target = np.array([item[1].numpy() for item in batch])
+    target = torch.Tensor(target)
+    return [padded, target]
