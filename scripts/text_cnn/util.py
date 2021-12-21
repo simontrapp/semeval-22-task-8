@@ -2,9 +2,6 @@ import json
 import nltk
 import sentence_transformers
 from torch import nn
-import pandas
-import os
-import random
 import torch
 import numpy as np
 
@@ -22,11 +19,6 @@ def process_json_to_sentences(path: str):
             text_sentences = nltk.sent_tokenize(article_data['text'])
             res.extend(text_sentences)
 
-        # if len(title) > 0:
-        #     res.append(title)
-        # if len(res) == 0:
-        #   print(article_data['text'], article_data)
-        #   raise Exception()
         kt = article_data['keywords']
         kt.extend(article_data['tags'])
         return res
