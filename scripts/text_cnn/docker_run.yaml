@@ -17,6 +17,7 @@ spec:
                     values:
                       - ancalagon
                       - gtx1080ti
+                      - rtx2080ti
       containers:
         - name: text-cnn
           image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/text-cnn-bn:0.0.1
