@@ -21,7 +21,7 @@ def _shared_eval_step(self, batch, batch_idx):
     return y_hat, loss, acc, _iou
 
 
-def train(model, loss_fn, optimizer, device, train_dataloader, writer,epoch=0, result_path=None):
+def train(model, loss_fn, optimizer, device, train_dataloader, writer, epoch=0, result_path=None):
     size = len(train_dataloader.dataset)
     num_batches = math.ceil(size / train_dataloader.batch_size)
     model.train()
@@ -34,7 +34,7 @@ def train(model, loss_fn, optimizer, device, train_dataloader, writer,epoch=0, r
         pred = model(X)
         loss = loss_fn(pred, y)
         la[batch_index] = loss.detach().cpu()
-        writer.add_scalar("Loss/train", loss, batch_index+epoch*num_batches)
+        writer.add_scalar("Loss/train", loss, batch_index + epoch * num_batches)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -45,12 +45,8 @@ def train(model, loss_fn, optimizer, device, train_dataloader, writer,epoch=0, r
 
 def validate(model, device, dataloader, result_path=None, save_predictions=False, ids=None, pbar_description=""):
     model.eval()
-    size = len(dataloader.dataset)
-    num_batches = math.ceil(size / dataloader.batch_size)
     p = []
     l = []
-    mse = np.zeros(num_batches)
-    pears = np.zeros(num_batches)
     pbar = tqdm(dataloader, file=sys.stdout)
     for batch_index, (X, y) in enumerate(pbar):
         pbar.set_description(pbar_description)
@@ -65,9 +61,9 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
     p = unnormalize_scores([i.item() for i in p])
     l = unnormalize_scores([i.item() for i in l])
 
-    mse = mean_squared_error(l,p)
-    pears = pearsonr(p,l)
-    mae = mean_absolute_error(l,p)
+    mse = mean_squared_error(l, p)
+    pears = pearsonr(p, l)
+    mae = mean_absolute_error(l, p)
     print(f"mse: {mse}")
     print(f"pcc: {pears}")
     print(f"mae: {mae}")
@@ -75,4 +71,4 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
     if save_predictions:
         pandas.DataFrame({'pair_id': ids, 'predictions': p}).to_csv(result_path, index=False)
 
-    return mse
+    return pears[0]
