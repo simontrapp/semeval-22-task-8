@@ -6,7 +6,7 @@ metadata:
 spec:
   template:
     spec:
-      priorityClassName: research-low
+      priorityClassName: research-med
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
