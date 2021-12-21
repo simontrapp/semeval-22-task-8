@@ -77,7 +77,7 @@ def predict_scores(model_path: str, test_data_path: str, output_path: str):
     out_data = pandas.DataFrame(pairs[util.DATA_PAIR_ID_1].combine(pairs[util.DATA_PAIR_ID_2], lambda p1, p2: f"{int(p1)}_{int(p2)}"))
     out_data['prediction'] = predictions
     # noinspection PyTypeChecker
-    out_data.to_csv(output_path, header=['pair_id', 'prediction'], index=False)
+    out_data.to_csv(output_path, header=['id', 'similarity'], index=False)
     write_metrics_to_file(output_path, y, predictions)
 
 
