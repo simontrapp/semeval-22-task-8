@@ -44,7 +44,6 @@ epochs = 200
 lr = 0.00005
 
 es_epochs = 20
-bert_embedding_size = 128
 """
 ---------------------------------------------------------------------
 |                                                                   |
@@ -82,7 +81,6 @@ print(checkpoint)
 """
 
 bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
-bert.max_seq_length = 512
 
 training_sentences_1, training_sentences_2, training_scores, training_ids, \
 evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, evaluation_ids, \
@@ -103,7 +101,7 @@ test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size, collate_fn=m
 
 loss_fn = nn.MSELoss().to(device)
 network = TextCnn(loss_fn, device).to(device)
-summary(network, (2, 40, 512))
+summary(network, (2, 100, 768))
 optimizer = Adam(network.parameters(), lr=lr)
 
 print("Start training model!")
