@@ -43,7 +43,7 @@ class InputNetwork(nn.Module):
             nn.Conv2d(in_channels=1, out_channels=10, kernel_size=(2, 8), stride=(1, 4)),
             nn.ReLU6(),
             nn.BatchNorm2d(10, eps=1e-3, momentum=0.999),
-            nn.Conv2d(in_channels=10, out_channels=50, kernel_size=(2, 127), stride=(1, 4)),
+            nn.Conv2d(in_channels=10, out_channels=50, kernel_size=(2, 191), stride=(1, 4)),
             nn.ReLU6(),
             nn.BatchNorm2d(50, eps=1e-3, momentum=0.999),
             MaxOverTimePooling()
@@ -52,7 +52,7 @@ class InputNetwork(nn.Module):
             nn.Conv2d(in_channels=1, out_channels=10, kernel_size=(3, 8), stride=(1, 4)),
             nn.ReLU6(),
             nn.BatchNorm2d(10, eps=1e-3, momentum=0.999),
-            nn.Conv2d(in_channels=10, out_channels=50, kernel_size=(3, 127), stride=(1, 4)),
+            nn.Conv2d(in_channels=10, out_channels=50, kernel_size=(3, 191), stride=(1, 4)),
             nn.ReLU6(),
             nn.BatchNorm2d(50, eps=1e-3, momentum=0.999),
             MaxOverTimePooling()
@@ -61,7 +61,7 @@ class InputNetwork(nn.Module):
             nn.Conv2d(in_channels=1, out_channels=10, kernel_size=(4, 8), stride=(1, 4)),
             nn.ReLU6(),
             nn.BatchNorm2d(10, eps=1e-3, momentum=0.999),
-            nn.Conv2d(in_channels=10, out_channels=50, kernel_size=(4, 127), stride=(1, 4)),
+            nn.Conv2d(in_channels=10, out_channels=50, kernel_size=(4, 191), stride=(1, 4)),
             nn.ReLU6(),
             nn.BatchNorm2d(50, eps=1e-3, momentum=0.999),
             MaxOverTimePooling()
@@ -70,7 +70,7 @@ class InputNetwork(nn.Module):
             nn.Conv2d(in_channels=1, out_channels=10, kernel_size=(5, 8), stride=(1, 4)),
             nn.ReLU6(),
             nn.BatchNorm2d(10, eps=1e-3, momentum=0.999),
-            nn.Conv2d(in_channels=10, out_channels=50, kernel_size=(5, 127), stride=(1, 4)),
+            nn.Conv2d(in_channels=10, out_channels=50, kernel_size=(5, 191), stride=(1, 4)),
             nn.ReLU6(),
             nn.BatchNorm2d(50, eps=1e-3, momentum=0.999),
             MaxOverTimePooling()
