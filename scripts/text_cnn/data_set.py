@@ -33,7 +33,8 @@ class SentenceDataset(Dataset):
 
 def my_collate(batch):
     data = [item[0].numpy() for item in batch]
-    m = np.max([x.shape[1] for x in data])
+    m = max(np.max([x.shape[1] for x in data]), 5)
+    # input can't be smaller than biggest kernel size of conv of text cnn
     padded = [np.concatenate((x, np.zeros((x.shape[0], m - x.shape[1], x.shape[2]))), axis=1) for x in data]
     padded = torch.Tensor(np.array(padded))
     target = np.array([item[1].numpy() for item in batch])
