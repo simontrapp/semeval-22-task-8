@@ -12,7 +12,7 @@ set -e
 #   ./scripts/bert_sdr/docker_run.sh
 
 export BUILDAH_FORMAT="docker"
-export NAME="ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/recursive:0.0.1"
+export NAME="ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/sim-cnn:0.0.1"
 alias buildah='buildah --runroot /tmp/$USER/.local/share/containers/runroot --root /tmp/$USER/.local/share/containers/storage/'
 
 echo "Building the container..."
