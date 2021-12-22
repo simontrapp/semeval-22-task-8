@@ -3,7 +3,7 @@ import torch
 from torch import nn
 from torch.optim import Adam
 from torch.utils.data import DataLoader
-from torchsummary import summary
+from torchinfo import summary
 from torch.utils.tensorboard import SummaryWriter
 
 import time
@@ -12,6 +12,7 @@ from sentence_transformers import SentenceTransformer
 from data_set import SentenceDataset, my_collate
 from preprocess import preprocess_data
 from text_cnn import TextCnn
+from lstm import lstm_model
 from train import train, validate
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -39,7 +40,7 @@ test_ratio = 0.01  # ~20% of pairs for testing if desired
 preprocess = True
 
 # training parameters
-batch_size = 32
+batch_size = 4
 epochs = 200
 lr = 0.00005
 
@@ -100,8 +101,8 @@ val_dl = DataLoader(val_ds, shuffle=False, batch_size=batch_size, collate_fn=my_
 test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size, collate_fn=my_collate)
 
 loss_fn = nn.MSELoss().to(device)
-network = TextCnn(loss_fn, device).to(device)
-summary(network, (2, 100, 768))
+network = lstm_model(loss_fn, batch_size=batch_size, embedding_length=768, device=device).to(device)
+summary(network, input_size=(batch_size, 2, 100, 768))
 optimizer = Adam(network.parameters(), lr=lr)
 
 print("Start training model!")
