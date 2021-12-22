@@ -10,4 +10,4 @@ joblib
 scipy
 tensorboard
 tqdm
-torchsummary
+torch-summary

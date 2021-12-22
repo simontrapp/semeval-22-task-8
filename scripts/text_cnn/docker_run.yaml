@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: tcnn-reg-bn
+  name: recursive
   namespace: studheinickel
 spec:
   template:
@@ -20,7 +20,7 @@ spec:
                       - rtx2080ti
       containers:
         - name: text-cnn
-          image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/text-cnn-bn:0.0.1
+          image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/recursive:0.0.1
           imagePullPolicy: "Always"
           resources:
             limits:
