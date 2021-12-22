@@ -26,9 +26,9 @@ print("Using {} device".format(device))
 |                                                                   |
 ---------------------------------------------------------------------
 """
-log_path = os.path.join("..", "..", "logs", "tcnn-reg-bn")
+log_path = os.path.join("..", "..", "logs", "recursive")
 log_path_tb = os.path.join(log_path, "tb_logs")
-log_name = "text_cnn_sigmoid"
+log_name = "recursive"
 base_path = os.path.join("..", "..", "data")
 data_path = os.path.join(base_path, "processed", "training_data")
 CSV_PATH = os.path.join(base_path, "semeval-2022_task8_train-data_batch.csv")
@@ -40,9 +40,9 @@ test_ratio = 0.01  # ~20% of pairs for testing if desired
 preprocess = True
 
 # training parameters
-batch_size = 4
+batch_size = 32
 epochs = 200
-lr = 0.00005
+lr = 0.001
 
 es_epochs = 20
 """
