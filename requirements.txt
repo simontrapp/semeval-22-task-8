@@ -5,6 +5,7 @@ seaborn
 nltk
 numpy
 scikit-learn
+gensim
 joblib
 scipy
 tensorflow
