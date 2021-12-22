@@ -2,6 +2,9 @@ from torch.utils.data import Dataset
 import torch
 from util import pad_input
 import numpy as np
+import tensorflow_hub as hub
+from sklearn.metrics.pairwise import cosine_similarity
+from tensorflow_text import SentencepieceTokenizer
 
 
 class SentenceDataset(Dataset):
@@ -13,30 +16,38 @@ class SentenceDataset(Dataset):
         self.labels = label
         self.encoder = encoder
         self.len = len(sentences_1)
+        self.use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
 
     def __len__(self):
         return self.len
 
     def __getitem__(self, idx):
-        e1 = self.encoder.encode(self.sentences_1[idx])
-        e2 = self.encoder.encode(self.sentences_2[idx])
-        m = max(e1.shape[0], e2.shape[0])
-        if e1.shape[0] < m:
-            e1 = np.concatenate((e1, np.zeros((m - e1.shape[0], e1.shape[1]))))
-        if e2.shape[0] < m:
-            e2 = np.concatenate((e2, np.zeros((m - e2.shape[0], e2.shape[1]))))
+        e1 = create_universal_sentence_encoder_embeddings(self.use_model, self.sentences_1[idx])
+        e2 = create_universal_sentence_encoder_embeddings(self.use_model, self.sentences_1[idx])
+        matrix = cosine_similarity(X=e1, Y=e2)
 
-        embedding = np.array([e1, e2])
+        np.fill_diagonal(matrix, 0)
+        # ms_0 = np.max(matrix, axis=0)
+        # ms_1 = np.max(matrix, axis=1)
+        # x =np.concat([ms_0, ms_1])
         label = self.labels[idx]
-        return torch.Tensor(embedding), torch.Tensor([label]).float()
+        return torch.Tensor([matrix]), torch.Tensor([label]).float()
+
+
+def create_universal_sentence_encoder_embeddings(model, input_sentences: list, batch_size: int = 50):
+    if len(input_sentences) > batch_size:  # prevent memory error by limiting number of sentences
+        res = []
+        for i in range(0, len(input_sentences), batch_size):
+            res.extend(model(input_sentences[i:min(i + batch_size, len(input_sentences))]))
+        return res
+    else:
+        return model(input_sentences)
 
 
 def my_collate(batch):
     data = [item[0].numpy() for item in batch]
-    m = max(np.max([x.shape[1] for x in data]), 5)
-    # input can't be smaller than biggest kernel size of conv of text cnn
-    padded = [np.concatenate((x, np.zeros((x.shape[0], m - x.shape[1], x.shape[2]))), axis=1) for x in data]
-    padded = torch.Tensor(np.array(padded))
+    max_w = np.max([x.shape[1] for x in data])
+    max_h = np.max([x.shape[2] for x in data])
+    data = [np.pad(x, ((0,0), (0, max_w - x.shape[1]), (0, max_h - x.shape[2]))) for x in data]
     target = np.array([item[1].numpy() for item in batch])
-    target = torch.Tensor(target)
-    return [padded, target]
+    return [torch.Tensor(data), torch.Tensor(target)]
