@@ -67,9 +67,9 @@ test_sentences_1, test_sentences_2, test_scores_normalized, test_scores_raw, tes
 print(f"Finished reading the data!\n# training sentence pairs: {len(training_sentences_1)}\n"
       f"# evaluation sentence pairs: {len(evaluation_sentences_1)}\n"
       f"# test sentence pairs: {len(test_sentences_1)}")
-train_ds = SentenceDataset(training_sentences_1, training_sentences_2, training_scores, use_model)
-val_ds = SentenceDataset(evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, use_model)
-test_ds = SentenceDataset(test_sentences_1, test_sentences_2, test_scores_normalized, use_model)
+train_ds = SentenceDataset(training_sentences_1, training_sentences_2, training_scores, bert)
+val_ds = SentenceDataset(evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, bert)
+test_ds = SentenceDataset(test_sentences_1, test_sentences_2, test_scores_normalized, bert)
 
 train_dl = DataLoader(train_ds, shuffle=True, batch_size=batch_size, collate_fn=my_collate)
 val_dl = DataLoader(val_ds, shuffle=False, batch_size=batch_size, collate_fn=my_collate)

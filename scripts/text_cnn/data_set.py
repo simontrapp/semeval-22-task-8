@@ -19,8 +19,8 @@ class SentenceDataset(Dataset):
         return self.len
 
     def __getitem__(self, idx):
-        e1 = create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
-        e2 = create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
+        e1 = self.encoder.encode(self.sentences_1[idx]) #create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
+        e2 = self.encoder.encode(self.sentences_2[idx]) #create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
         matrix = cosine_similarity(X=e1, Y=e2)
 
         np.fill_diagonal(matrix, 0)
