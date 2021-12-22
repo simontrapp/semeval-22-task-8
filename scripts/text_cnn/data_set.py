@@ -2,9 +2,7 @@ from torch.utils.data import Dataset
 import torch
 from util import pad_input
 import numpy as np
-import tensorflow_hub as hub
 from sklearn.metrics.pairwise import cosine_similarity
-from tensorflow_text import SentencepieceTokenizer
 
 
 class SentenceDataset(Dataset):
@@ -16,14 +14,13 @@ class SentenceDataset(Dataset):
         self.labels = label
         self.encoder = encoder
         self.len = len(sentences_1)
-        self.use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
 
     def __len__(self):
         return self.len
 
     def __getitem__(self, idx):
-        e1 = create_universal_sentence_encoder_embeddings(self.use_model, self.sentences_1[idx])
-        e2 = create_universal_sentence_encoder_embeddings(self.use_model, self.sentences_1[idx])
+        e1 = create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
+        e2 = create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
         matrix = cosine_similarity(X=e1, Y=e2)
 
         np.fill_diagonal(matrix, 0)
