@@ -77,7 +77,7 @@ test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size, collate_fn=m
 
 loss_fn = nn.MSELoss().to(device)
 network = SimCnn(loss_fn, device=device).to(device)
-summary(network, input_size=(batch_size, 1, 100, 100))
+summary(network, input_size=(batch_size, 1, 20, 100))
 optimizer = SGD(network.parameters(), lr=lr)
 
 print("Start training model!")

@@ -7,6 +7,9 @@ import nltk
 from tqdm import tqdm
 import sys
 
+import tensorflow_hub as hub
+from tensorflow_text import SentencepieceTokenizer
+
 nltk.download('punkt')
 
 
@@ -35,6 +38,7 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
     test_scores_raw = []
 
     if not ids_exist:
+
         print("Starting reading the data")
         sentence_pairs = pandas.read_csv(csv_path)
         pbar = tqdm(sentence_pairs.iterrows(), total=sentence_pairs.shape[0], file=sys.stdout)
@@ -90,13 +94,25 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
         test_scores_normalized = np.load(test_scores_normalized_out, allow_pickle=True)
         test_scores_raw = np.load(test_scores_raw_out, allow_pickle=True)
 
+    use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
+
     training_sentences_1, training_sentences_2 = load_sentences(training_ids, data_dir,
                                                                 description="Load train sentences")
+    training_sentences_1 = [create_universal_sentence_encoder_embeddings(use_model, x) for x in training_sentences_1]
+    training_sentences_2 = [create_universal_sentence_encoder_embeddings(use_model, x) for x in training_sentences_2]
 
     evaluation_sentences_1, evaluation_sentences_2 = load_sentences(evaluation_ids, data_dir,
                                                                     description="Load validation sentences")
+    evaluation_sentences_1 = [create_universal_sentence_encoder_embeddings(use_model, x) for x in
+                              evaluation_sentences_1]
+    evaluation_sentences_2 = [create_universal_sentence_encoder_embeddings(use_model, x) for x in
+                              evaluation_sentences_2]
 
     test_sentences_1, test_sentences_2 = load_sentences(test_ids, data_dir, description="Load test sentences")
+    test_sentences_1 = [create_universal_sentence_encoder_embeddings(use_model, x) for x in test_sentences_1]
+    test_sentences_2 = [create_universal_sentence_encoder_embeddings(use_model, x) for x in test_sentences_2]
+
+    del use_model
 
     return training_sentences_1, training_sentences_2, training_scores, training_ids, \
            evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, evaluation_ids, \
@@ -124,3 +140,13 @@ def load_sentences(pair_ids, data_path, description=""):
                 second_json_path)  # process_article_to_encoding(second_json_path, model)
             s_2.append(sentence_2)
     return s_1, s_2
+
+
+def create_universal_sentence_encoder_embeddings(model, input_sentences: list, batch_size: int = 50):
+    if len(input_sentences) > batch_size:  # prevent memory error by limiting number of sentences
+        res = []
+        for i in range(0, len(input_sentences), batch_size):
+            res.extend(model(input_sentences[i:min(i + batch_size, len(input_sentences))]))
+        return res
+    else:
+        return model(input_sentences)

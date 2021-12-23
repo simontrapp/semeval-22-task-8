@@ -19,8 +19,8 @@ class SentenceDataset(Dataset):
         return self.len
 
     def __getitem__(self, idx):
-        e1 = self.encoder.encode(self.sentences_1[idx]) #create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
-        e2 = self.encoder.encode(self.sentences_2[idx]) #create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
+        e1 = self.sentences_1[idx] #create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
+        e2 = self.sentences_2[idx] #create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
         matrix = cosine_similarity(X=e1, Y=e2)
 
         np.fill_diagonal(matrix, 0)
@@ -43,8 +43,8 @@ def create_universal_sentence_encoder_embeddings(model, input_sentences: list, b
 
 def my_collate(batch):
     data = [item[0].numpy() for item in batch]
-    max_w = np.max([x.shape[1] for x in data])
-    max_h = np.max([x.shape[2] for x in data])
+    max_w = max(np.max([x.shape[1] for x in data]),20)
+    max_h = max(np.max([x.shape[2] for x in data]),20)
     data = [np.pad(x, ((0,0), (0, max_w - x.shape[1]), (0, max_h - x.shape[2]))) for x in data]
     target = np.array([item[1].numpy() for item in batch])
     return [torch.Tensor(data), torch.Tensor(target)]
