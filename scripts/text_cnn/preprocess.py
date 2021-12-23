@@ -98,8 +98,16 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
 
     training_sentences_1, training_sentences_2 = load_sentences(training_ids, data_dir,
                                                                 description="Load train sentences")
-    training_sentences_1 = [create_universal_sentence_encoder_embeddings(use_model, x) for x in training_sentences_1]
-    training_sentences_2 = [create_universal_sentence_encoder_embeddings(use_model, x) for x in training_sentences_2]
+    ts_1 = []
+    for x in training_sentences_1:
+        ts_1.append(create_universal_sentence_encoder_embeddings(use_model, x).numpy())
+        del x
+    print("encoded sentences_1")
+    ts_2 = []
+    for x in training_sentences_2:
+        ts_2.append(create_universal_sentence_encoder_embeddings(use_model, x).numpy())
+        del x
+    print("encoded sentences_2")
 
     evaluation_sentences_1, evaluation_sentences_2 = load_sentences(evaluation_ids, data_dir,
                                                                     description="Load validation sentences")
