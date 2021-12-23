@@ -96,38 +96,39 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
         test_scores_raw = np.load(test_scores_raw_out, allow_pickle=True)
 
     use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
+    use_batch_size = 16
 
     training_sentences_1, training_sentences_2 = load_sentences(training_ids, data_dir,
                                                                 description="Load train sentences")
     train_s1 = [None]*len(training_sentences_1)
     for index, x in enumerate(tqdm(training_sentences_1)):
-        train_s1[index] = create_universal_sentence_encoder_embeddings(use_model,x,batch_size=34)
+        train_s1[index] = create_universal_sentence_encoder_embeddings(use_model,x,batch_size=use_batch_size)
     del training_sentences_1
     train_s2 = [None] * len(training_sentences_2)
     for index, x in enumerate(tqdm(training_sentences_2)):
-        train_s2[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=34)
+        train_s2[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
     del training_sentences_2
 
     evaluation_sentences_1, evaluation_sentences_2 = load_sentences(evaluation_ids, data_dir,
                                                                     description="Load validation sentences")
     eval_s1 = [None]*len(evaluation_sentences_1)
     for index, x in enumerate(tqdm(evaluation_sentences_1)):
-        eval_s1[index] = create_universal_sentence_encoder_embeddings(use_model,x,batch_size=34)
+        eval_s1[index] = create_universal_sentence_encoder_embeddings(use_model,x,batch_size=use_batch_size)
     del evaluation_sentences_1
     eval_s2 = [None] * len(evaluation_sentences_2)
     for index, x in enumerate(tqdm(evaluation_sentences_2)):
-        eval_s2[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=34)
+        eval_s2[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
     del evaluation_sentences_2
 
 
     test_sentences_1, test_sentences_2 = load_sentences(test_ids, data_dir, description="Load test sentences")
     test_s1 = [None] * len(test_sentences_1)
     for index, x in enumerate(tqdm(test_sentences_1)):
-        test_s1[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=34)
+        test_s1[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
     del test_sentences_1
-    test_s2 = [None] * len(evaluation_sentences_2)
+    test_s2 = [None] * len(test_sentences_2)
     for index, x in enumerate(tqdm(test_sentences_2)):
-        test_s2[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=34)
+        test_s2[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
     del test_sentences_2
 
     del use_model
