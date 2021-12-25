@@ -12,11 +12,12 @@ spec:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
                 - matchExpressions:
-                  - key: kubernetes.io/hostname
+                  - key: gputype
                     operator: In
                     values:
                       - rtx8000
                       - titan
+                      - rtx2080ti
       containers:
         - name: text-cnn
           image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/sim-cnn:0.0.1
