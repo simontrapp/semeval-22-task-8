@@ -24,12 +24,22 @@ def process_json_to_sentences(path: str):
         return res
 
 
+def process_json_to_keywords(path: str):
+    with open(path, 'r') as file:
+        article_data = json.load(file)
+        kt = article_data['keywords']
+        kt.extend(article_data['tags'])
+        return kt
+
+
 def process_article_to_sentence(article):
     return nltk.sent_tokenize(article)
+
 
 def process_article_to_encoding(path: str, model):
     sentences = process_json_to_sentences(path)
     return model.encode(sentences)
+
 
 def create_sbert_embeddings(model: sentence_transformers.SentenceTransformer, sentence):
     sentences = process_article_to_sentence(sentence)
@@ -72,6 +82,7 @@ def ohe2lable(ohe):
 # return 0-1 scores to 1-4 form
 def unnormalize_scores(scores: list):
     return [s * 3 + 1 for s in scores]  # TODO: convert to integer scores ( round() )
+
 
 def pad_input(data):
     max = np.max([x.shape[1] for x in data])

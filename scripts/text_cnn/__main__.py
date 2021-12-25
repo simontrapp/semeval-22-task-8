@@ -28,14 +28,14 @@ print("Using {} device".format(device))
 |                                                                   |
 ---------------------------------------------------------------------
 """
-log_path = os.path.join("..", "..", "logs", "recursive")
+log_path = os.path.join("..", "..", "logs", "sim-cnn")
 log_path_tb = os.path.join(log_path, "tb_logs")
-log_name = "recursive"
+log_name = "sim_cnn"
 base_path = os.path.join("..", "..", "data")
 data_path = os.path.join(base_path, "processed", "training_data")
 CSV_PATH = os.path.join(base_path, "semeval-2022_task8_train-data_batch.csv")
 
-evaluation_ratio = 0.3  # ~20% of pairs for evaluation
+evaluation_ratio = 0.2  # ~20% of pairs for evaluation
 create_test_set = False
 test_ratio = 0.01  # ~20% of pairs for testing if desired
 
@@ -58,18 +58,18 @@ es_epochs = 20
 bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
 use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
 
-training_sentences_1, training_sentences_2, training_scores, training_ids, \
-evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, evaluation_ids, \
-test_sentences_1, test_sentences_2, test_scores_normalized, test_scores_raw, test_ids \
+train_ds, training_scores, training_ids, \
+eval_ds, evaluation_scores, evaluation_ids, \
+test_ds, test_scores_normalized, test_scores_raw, test_ids \
     = preprocess_data(data_path, CSV_PATH, base_path, create_test_set=True, validation_ratio=evaluation_ratio,
                       test_ratio=test_ratio)
 
-print(f"Finished reading the data!\n# training sentence pairs: {len(training_sentences_1)}\n"
-      f"# evaluation sentence pairs: {len(evaluation_sentences_1)}\n"
-      f"# test sentence pairs: {len(test_sentences_1)}")
-train_ds = SentenceDataset(training_sentences_1, training_sentences_2, training_scores, bert)
-val_ds = SentenceDataset(evaluation_sentences_1, evaluation_sentences_2, evaluation_scores, bert)
-test_ds = SentenceDataset(test_sentences_1, test_sentences_2, test_scores_normalized, bert)
+print(f"Finished reading the data!\n# training sentence pairs: {len(train_ds)}\n"
+      f"# evaluation sentence pairs: {len(eval_ds)}\n"
+      f"# test sentence pairs: {len(test_ds)}")
+train_ds = SentenceDataset(train_ds, training_scores, bert)
+val_ds = SentenceDataset(eval_ds, evaluation_scores, bert)
+test_ds = SentenceDataset(test_ds, test_scores_normalized, bert)
 
 train_dl = DataLoader(train_ds, shuffle=True, batch_size=batch_size, collate_fn=my_collate)
 val_dl = DataLoader(val_ds, shuffle=False, batch_size=batch_size, collate_fn=my_collate)
@@ -77,7 +77,7 @@ test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size, collate_fn=m
 
 loss_fn = nn.MSELoss().to(device)
 network = SimCnn(loss_fn, device=device).to(device)
-summary(network, input_size=(batch_size, 1, 20, 100))
+summary(network, input_size=(batch_size, 2, 20, 100))
 optimizer = SGD(network.parameters(), lr=lr)
 
 print("Start training model!")

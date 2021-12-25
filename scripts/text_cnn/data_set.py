@@ -7,28 +7,24 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 class SentenceDataset(Dataset):
 
-    def __init__(self, sentences_1, sentences_2, label, encoder):
+    def __init__(self, dataset, label, encoder):
         super(SentenceDataset, self).__init__()
-        self.sentences_1 = sentences_1
-        self.sentences_2 = sentences_2
+        self.dataset = dataset
         self.labels = label
         self.encoder = encoder
-        self.len = len(sentences_1)
+        self.len = len(dataset)
 
     def __len__(self):
         return self.len
 
     def __getitem__(self, idx):
-        e1 = self.sentences_1[idx] #create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
-        e2 = self.sentences_2[idx] #create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
-        matrix = cosine_similarity(X=e1, Y=e2)
+        e1 = self.dataset[idx] #create_universal_sentence_encoder_embeddings(self.encoder, self.sentences_1[idx])
 
-        np.fill_diagonal(matrix, 0)
         # ms_0 = np.max(matrix, axis=0)
         # ms_1 = np.max(matrix, axis=1)
         # x =np.concat([ms_0, ms_1])
         label = self.labels[idx]
-        return torch.Tensor([matrix]), torch.Tensor([label]).float()
+        return torch.Tensor(e1), torch.Tensor([label]).float()
 
 
 def create_universal_sentence_encoder_embeddings(model, input_sentences: list, batch_size: int = 50):

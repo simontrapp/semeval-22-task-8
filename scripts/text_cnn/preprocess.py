@@ -2,11 +2,12 @@ import numpy as np
 import os
 import pandas
 import random
-from util import lable2ohe, process_json_to_sentences, normalize_score
+from util import lable2ohe, process_json_to_sentences, normalize_score, process_json_to_keywords
 import nltk
 from tqdm import tqdm
 import sys
 from time import time
+from sklearn.metrics.pairwise import cosine_similarity
 
 import tensorflow_hub as hub
 from tensorflow_text import SentencepieceTokenizer
@@ -56,6 +57,7 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
             if os.path.exists(first_json_path) and os.path.exists(second_json_path):
                 sentence_1 = process_json_to_sentences(first_json_path)
                 sentence_2 = process_json_to_sentences(second_json_path)
+
                 if len(sentence_1) == 0 or len(sentence_2) == 0:
                     continue
                 if (len(sentence_1) > 100) or (len(sentence_2) > 100):
@@ -98,49 +100,84 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
     use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
     use_batch_size = 16
 
-    training_sentences_1, training_sentences_2 = load_sentences(training_ids, data_dir,
-                                                                description="Load train sentences")
-    train_s1 = [None]*len(training_sentences_1)
-    for index, x in enumerate(tqdm(training_sentences_1)):
-        train_s1[index] = create_universal_sentence_encoder_embeddings(use_model,x,batch_size=use_batch_size)
-    del training_sentences_1
-    train_s2 = [None] * len(training_sentences_2)
-    for index, x in enumerate(tqdm(training_sentences_2)):
-        train_s2[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
-    del training_sentences_2
+    # train dataset
+    training_sentences_1, train_keywords_1, training_sentences_2, train_keywords_2 = load_sentences(training_ids,
+                                                                                                    data_dir,
+                                                                                                    description="Load train sentences")
+    train_s1 = sentences_2_embedding(training_sentences_1, use_batch_size, use_model)
+    train_s2 = sentences_2_embedding(training_sentences_2, use_batch_size, use_model)
+    train_k1 = sentences_2_embedding(train_keywords_1, use_batch_size, use_model)
+    train_k2 = sentences_2_embedding(train_keywords_2, use_batch_size, use_model)
+    train_ds = embeddings_2_similarity(train_s1, train_s2)
+    add_keywords(train_ds, train_k1, train_k2)
 
-    evaluation_sentences_1, evaluation_sentences_2 = load_sentences(evaluation_ids, data_dir,
-                                                                    description="Load validation sentences")
-    eval_s1 = [None]*len(evaluation_sentences_1)
-    for index, x in enumerate(tqdm(evaluation_sentences_1)):
-        eval_s1[index] = create_universal_sentence_encoder_embeddings(use_model,x,batch_size=use_batch_size)
-    del evaluation_sentences_1
-    eval_s2 = [None] * len(evaluation_sentences_2)
-    for index, x in enumerate(tqdm(evaluation_sentences_2)):
-        eval_s2[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
-    del evaluation_sentences_2
+    # validation dataset
+    evaluation_sentences_1, evaluation_keywords_1, evaluation_sentences_2, evaluation_keywords_2 = load_sentences(
+        evaluation_ids, data_dir,
+        description="Load validation sentences")
+    eval_s1 = sentences_2_embedding(evaluation_sentences_1, use_batch_size, use_model)
+    eval_s2 = sentences_2_embedding(evaluation_sentences_2, use_batch_size, use_model)
+    eval_k1 = sentences_2_embedding(evaluation_keywords_1, use_batch_size, use_model)
+    eval_k2 = sentences_2_embedding(evaluation_keywords_2, use_batch_size, use_model)
+    eval_ds = embeddings_2_similarity(eval_s1, eval_s2)
+    add_keywords(eval_ds, eval_k1, eval_k2)
 
-
-    test_sentences_1, test_sentences_2 = load_sentences(test_ids, data_dir, description="Load test sentences")
-    test_s1 = [None] * len(test_sentences_1)
-    for index, x in enumerate(tqdm(test_sentences_1)):
-        test_s1[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
-    del test_sentences_1
-    test_s2 = [None] * len(test_sentences_2)
-    for index, x in enumerate(tqdm(test_sentences_2)):
-        test_s2[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
-    del test_sentences_2
+    # test dataset
+    test_sentences_1, test_keywords_1, test_sentences_2, test_keywords_2 = load_sentences(test_ids, data_dir,
+                                                                                          description="Load test sentences")
+    test_s1 = sentences_2_embedding(test_sentences_1, use_batch_size, use_model)
+    test_s2 = sentences_2_embedding(test_sentences_2, use_batch_size, use_model)
+    test_k1 = sentences_2_embedding(test_keywords_1, use_batch_size, use_model)
+    test_k2 = sentences_2_embedding(test_keywords_2, use_batch_size, use_model)
+    test_ds = embeddings_2_similarity(test_s1, test_s2)
+    add_keywords(test_ds, test_k1, test_k2)
 
     del use_model
 
-    return train_s1, train_s2, training_scores, training_ids, \
-           eval_s1, eval_s2, evaluation_scores, evaluation_ids, \
-           test_s1, test_s2, test_scores_normalized, test_scores_raw, test_ids
+    return train_ds, training_scores, training_ids, \
+           eval_ds, evaluation_scores, evaluation_ids, \
+           test_ds, test_scores_normalized, test_scores_raw, test_ids
+
+
+def add_keywords(dataset, keywords_1, keywords_2):
+    for index, (k1, k2) in enumerate(tqdm(zip(keywords_1, keywords_2))):
+        if (len(k1) == 0) or (len(k2) == 0):
+            dataset[index] = np.pad(np.array([dataset[index]]), ((0, 1), (0, 0), (0, 0)))
+            continue
+        sim = cosine_similarity(X=k1, Y=k2)
+        np.fill_diagonal(sim, 0)
+        max_w = max(np.max([sim.shape[0], dataset[index].shape[0]]), 20)
+        max_h = max(np.max([sim.shape[1], dataset[index].shape[1]]), 20)
+        sim = np.pad(sim, ((0, max_w - sim.shape[0]), (0, max_h - sim.shape[1])))
+        sen = np.pad(dataset[index], ((0, max_w - dataset[index].shape[0]), (0, max_h - dataset[index].shape[1])))
+        dataset[index] = np.array([sen, sim])
+
+
+def embeddings_2_similarity(s1, s2):
+    dataset = []
+    for (s1, s2) in tqdm(zip(s1, s2)):
+        e1 = cosine_similarity(X=s1, Y=s2)
+        np.fill_diagonal(e1, 0)
+        dataset.append(e1)
+    del s1
+    del s2
+    return dataset
+
+
+def sentences_2_embedding(sentences, use_batch_size, use_model):
+    train_s1 = [None] * len(sentences)
+    for index, x in enumerate(tqdm(sentences)):
+        train_s1[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
+    del sentences
+    return train_s1
 
 
 def load_sentences(pair_ids, data_path, description=""):
     s_1 = []
+    k_1 = []
     s_2 = []
+    k_2 = []
+
     pbar = tqdm(pair_ids, file=sys.stdout)
     for id in pbar:
         pbar.set_description(description)
@@ -155,10 +192,12 @@ def load_sentences(pair_ids, data_path, description=""):
             sentence_1 = process_json_to_sentences(
                 first_json_path)  # process_article_to_encoding(first_json_path, model)
             s_1.append(sentence_1)
+            k_1.append(process_json_to_keywords(first_json_path))
             sentence_2 = process_json_to_sentences(
                 second_json_path)  # process_article_to_encoding(second_json_path, model)
             s_2.append(sentence_2)
-    return s_1, s_2
+            k_2.append(process_json_to_keywords(second_json_path))
+    return s_1, k_1, s_2, k_2
 
 
 def create_universal_sentence_encoder_embeddings(model, input_sentences: list, batch_size: int = 50):
