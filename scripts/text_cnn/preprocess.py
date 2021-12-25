@@ -151,6 +151,10 @@ def add_keywords(dataset, keywords_1, keywords_2):
         sim = np.pad(sim, ((0, max_w - sim.shape[0]), (0, max_h - sim.shape[1])))
         sen = np.pad(dataset[index], ((0, max_w - dataset[index].shape[0]), (0, max_h - dataset[index].shape[1])))
         dataset[index] = np.array([sen, sim])
+        del sim
+        del sen
+    del keywords_1
+    del keywords_2
 
 
 def embeddings_2_similarity(s1, s2):

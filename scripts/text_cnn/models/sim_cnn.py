@@ -62,4 +62,5 @@ class CnnBlock(nn.Module):
         x = self.c1(x)
         exp = self.c2(x)
         x = torch.add(x, exp)
+        del exp
         return self.c3(x)

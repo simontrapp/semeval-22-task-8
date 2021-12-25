@@ -33,11 +33,11 @@ def train(model, loss_fn, optimizer, device, train_dataloader, writer, epoch=0, 
         X, y = X.to(device), y.to(device)
         pred = model(X)
         loss = loss_fn(pred, y)
-        la[batch_index] = loss.detach().cpu()
-        writer.add_scalar("Loss/train", loss, batch_index + epoch * num_batches)
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
+        la[batch_index] = loss.detach()
+        writer.add_scalar("Loss/train", loss.detach(), batch_index + epoch * num_batches)
         if batch_index % 20 == 0:
             print("")
     print(f"Epoch loss is {np.average(la)}")
