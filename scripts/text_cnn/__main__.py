@@ -28,7 +28,7 @@ print("Using {} device".format(device))
 |                                                                   |
 ---------------------------------------------------------------------
 """
-log_path = os.path.join("..", "..", "logs", "sim-cnn")
+log_path = os.path.join("..", "..", "logs", "sim-cnn-kw")
 log_path_tb = os.path.join(log_path, "tb_logs")
 log_name = "sim_cnn"
 base_path = os.path.join("..", "..", "data")
@@ -44,7 +44,7 @@ preprocess = True
 # training parameters
 batch_size = 16
 epochs = 200
-lr = 0.001
+lr = 0.0005
 
 es_epochs = 20
 """
