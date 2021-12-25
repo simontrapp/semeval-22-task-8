@@ -10,23 +10,12 @@ from scipy.stats import pearsonr
 from util import unnormalize_scores
 
 
-def _shared_eval_step(self, batch, batch_idx):
-    x, y = batch
-    y_hat = self(x)
-    loss = self.loss_fn(y_hat, y)
-    y = y.int()
-    acc = accuracy(y_hat, y)
-    _iou = iou(y_hat, y, num_classes=2)
-
-    return y_hat, loss, acc, _iou
-
-
 def train(model, loss_fn, optimizer, device, train_dataloader, writer, epoch=0, result_path=None):
     size = len(train_dataloader.dataset)
     num_batches = math.ceil(size / train_dataloader.batch_size)
     model.train()
     pbar = tqdm(train_dataloader, file=sys.stdout)
-    la = np.zeros(num_batches)
+    total_loss =0
     for batch_index, (X, y) in enumerate(pbar):
         pbar.set_description(f"Train epoch {epoch}")
         sys.stdout.flush()
@@ -36,11 +25,11 @@ def train(model, loss_fn, optimizer, device, train_dataloader, writer, epoch=0, 
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
-        la[batch_index] = loss.detach()
-        writer.add_scalar("Loss/train", loss.detach(), batch_index + epoch * num_batches)
+        total_loss += float(loss)
+        writer.add_scalar("Loss/train", float(loss), batch_index + epoch * num_batches)
         if batch_index % 20 == 0:
             print("")
-    print(f"Epoch loss is {np.average(la)}")
+    print(f"Epoch loss is {total_loss/num_batches}")
 
 
 def validate(model, device, dataloader, result_path=None, save_predictions=False, ids=None, pbar_description=""):
