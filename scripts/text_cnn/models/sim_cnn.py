@@ -7,12 +7,13 @@ class SimCnn(nn.Module):
     def __init__(self, loss_fn, device="cuda"):
         super(SimCnn, self).__init__()
 
-        self.loss_fn = loss_fn
         self.final_network = nn.Sequential(
-            CnnBlock(in_channels=2, out_channels=64, expand=128),
-            nn.MaxPool2d(kernel_size=(3, 3)),
+            nn.Conv2d(in_channels=2, out_channels=8, kernel_size=(3, 3), padding='same'),
+            nn.MaxPool2d(kernel_size=(3,3)),
+            CnnBlock(in_channels=8, out_channels=32, expand=64),
+            CnnBlock(in_channels=32, out_channels=64, expand=128),
+            nn.MaxPool2d(kernel_size=(3,3)),
             CnnBlock(in_channels=64, out_channels=128, expand=256),
-            nn.MaxPool2d(kernel_size=(3, 3)),
             CnnBlock(in_channels=128, out_channels=256, expand=512),
             MaxOverTimePooling(),
             nn.Flatten(),
@@ -28,6 +29,7 @@ class SimCnn(nn.Module):
             nn.Sigmoid()
             # nn.Softmax(dim=1)
         )
+        self.loss_fn = loss_fn
 
         self.flatten = nn.Flatten()
 

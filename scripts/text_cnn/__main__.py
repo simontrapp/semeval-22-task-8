@@ -42,7 +42,7 @@ test_ratio = 0.01  # ~20% of pairs for testing if desired
 preprocess = True
 
 # training parameters
-batch_size = 4
+batch_size = 16
 epochs = 200
 lr = 0.0005
 
@@ -77,7 +77,7 @@ test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size, collate_fn=m
 
 loss_fn = nn.MSELoss().to(device)
 network = SimCnn(loss_fn, device=device).to(device)
-summary(network, input_size=(batch_size, 2, 20, 100))
+summary(network, input_size=(batch_size, 2, 100, 100))
 optimizer = SGD(network.parameters(), lr=lr)
 
 print("Start training model!")

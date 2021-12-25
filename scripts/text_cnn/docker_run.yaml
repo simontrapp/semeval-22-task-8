@@ -13,11 +13,10 @@ spec:
             nodeSelectorTerms:
                 - matchExpressions:
                   - key: kubernetes.io/hostname
-                    operator: NotIn
+                    operator: In
                     values:
-                      - ancalagon
-                      - gtx1080ti
-                      - rtx2080ti
+                      - rtx8000
+                      - titan
       containers:
         - name: text-cnn
           image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/sim-cnn:0.0.1
