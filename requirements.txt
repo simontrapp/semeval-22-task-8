@@ -17,3 +17,5 @@ tensorboard
 tqdm
 torch-summary
 torchinfo
+
+nvidia-ml-py3
