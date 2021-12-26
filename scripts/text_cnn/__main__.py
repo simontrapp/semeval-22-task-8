@@ -1,11 +1,3 @@
-import nvidia_smi
-
-nvidia_smi.nvmlInit()
-handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
-# card id 0 hardcoded here, there is also a call to get all available card ids, so we could iterate
-
-res = nvidia_smi.nvmlDeviceGetUtilizationRates(handle)
-print(f'gpu: {res.gpu}%, gpu-mem: {res.memory}%')
 import os
 import torch
 from torch import nn
@@ -15,8 +7,8 @@ from torchinfo import summary
 from torch.utils.tensorboard import SummaryWriter
 #import tensorflow_hub as hub
 import tensorflow as tf
-gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.333)
 
+gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.333)
 sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 from tensorflow_text import SentencepieceTokenizer
 
@@ -75,12 +67,6 @@ eval_ds, evaluation_scores, evaluation_ids, \
 test_ds, test_scores_normalized, test_scores_raw, test_ids \
     = preprocess_data(data_path, CSV_PATH, base_path, create_test_set=True, validation_ratio=evaluation_ratio,
                       test_ratio=test_ratio)
-nvidia_smi.nvmlInit()
-handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
-# card id 0 hardcoded here, there is also a call to get all available card ids, so we could iterate
-
-res = nvidia_smi.nvmlDeviceGetUtilizationRates(handle)
-print(f'gpu: {res.gpu}%, gpu-mem: {res.memory}%')
 
 print(f"Finished reading the data!\n# training sentence pairs: {len(train_ds)}\n"
       f"# evaluation sentence pairs: {len(eval_ds)}\n"

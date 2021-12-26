@@ -8,7 +8,6 @@ from tqdm import tqdm
 import sys
 from time import time
 from sklearn.metrics.pairwise import cosine_similarity
-import nvidia_smi
 
 import tensorflow_hub as hub
 from tensorflow_text import SentencepieceTokenizer
@@ -99,26 +98,13 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
         test_scores_raw = np.load(test_scores_raw_out, allow_pickle=True)
 
     use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
-    use_batch_size = 16
-
-    nvidia_smi.nvmlInit()
-    handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
-    # card id 0 hardcoded here, there is also a call to get all available card ids, so we could iterate
-
-    res = nvidia_smi.nvmlDeviceGetUtilizationRates(handle)
-    print(f'gpu: {res.gpu}%, gpu-mem: {res.memory}%')
+    use_batch_size = 32
 
     # train dataset
     training_sentences_1, train_keywords_1, training_sentences_2, train_keywords_2 = load_sentences(training_ids,
                                                                                                     data_dir,
                                                                                                     description="Load train sentences")
     train_s1 = sentences_2_embedding(training_sentences_1, use_batch_size, use_model)
-    nvidia_smi.nvmlInit()
-    handle = nvidia_smi.nvmlDeviceGetHandleByIndex(0)
-    # card id 0 hardcoded here, there is also a call to get all available card ids, so we could iterate
-
-    res = nvidia_smi.nvmlDeviceGetUtilizationRates(handle)
-    print(f'gpu: {res.gpu}%, gpu-mem: {res.memory}%')
     train_s2 = sentences_2_embedding(training_sentences_2, use_batch_size, use_model)
     train_k1 = sentences_2_embedding(train_keywords_1, use_batch_size, use_model)
     train_k2 = sentences_2_embedding(train_keywords_2, use_batch_size, use_model)
@@ -222,7 +208,7 @@ def create_universal_sentence_encoder_embeddings(model, input_sentences: list, b
     if len(input_sentences) > batch_size:  # prevent memory error by limiting number of sentences
         res = []
         for i in range(0, len(input_sentences), batch_size):
-            res.extend(model(input_sentences[i:min(i + batch_size, len(input_sentences))]))
-        return res
+            res.extend(model(input_sentences[i:min(i + batch_size, len(input_sentences))]).numpy())
+        return np.array(res)
     else:
-        return model(input_sentences)
+        return model(input_sentences).numpy()

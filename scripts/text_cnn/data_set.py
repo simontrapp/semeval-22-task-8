@@ -26,15 +26,6 @@ class SentenceDataset(Dataset):
         return torch.Tensor(e1), torch.Tensor([label]).float()
 
 
-def create_universal_sentence_encoder_embeddings(model, input_sentences: list, batch_size: int = 50):
-    if len(input_sentences) > batch_size:  # prevent memory error by limiting number of sentences
-        res = []
-        for i in range(0, len(input_sentences), batch_size):
-            res.extend(model(input_sentences[i:min(i + batch_size, len(input_sentences))]))
-        return res
-    else:
-        return model(input_sentences)
-
 
 def my_collate(batch):
     data = [item[0].numpy() for item in batch]
