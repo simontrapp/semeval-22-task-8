@@ -8,8 +8,8 @@ class SimCnn(nn.Module):
         super(SimCnn, self).__init__()
 
         self.final_network = nn.Sequential(
-            CnnBlock(in_channels=2, out_channels=8, expand=16),
-            CnnBlock(in_channels=8, out_channels=16, expand=32),
+            CnnBlock(in_channels=2, out_channels=16, expand=32),
+            CnnBlock(in_channels=16, out_channels=32, expand=64),
             nn.MaxPool2d(kernel_size=(3,3)),
             CnnBlock(in_channels=32, out_channels=64, expand=128),
             CnnBlock(in_channels=64, out_channels=128, expand=256),
