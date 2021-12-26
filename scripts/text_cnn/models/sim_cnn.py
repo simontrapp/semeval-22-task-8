@@ -10,10 +10,10 @@ class SimCnn(nn.Module):
         self.final_network = nn.Sequential(
             CnnBlock(in_channels=2, out_channels=16, expand=32),
             CnnBlock(in_channels=16, out_channels=32, expand=64),
-            nn.MaxPool2d(kernel_size=(3,3)),
+            nn.MaxPool2d(kernel_size=(3, 3)),
             CnnBlock(in_channels=32, out_channels=64, expand=128),
             CnnBlock(in_channels=64, out_channels=128, expand=256),
-            nn.MaxPool2d(kernel_size=(3,3)),
+            nn.MaxPool2d(kernel_size=(3, 3)),
             CnnBlock(in_channels=128, out_channels=256, expand=512),
             CnnBlock(in_channels=256, out_channels=512, expand=1024),
             MaxOverTimePooling(),
