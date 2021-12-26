@@ -8,26 +8,28 @@ class SimCnn(nn.Module):
         super(SimCnn, self).__init__()
 
         self.final_network = nn.Sequential(
-            nn.Conv2d(in_channels=2, out_channels=8, kernel_size=(3, 3), padding='same'),
+            CnnBlock(in_channels=2, out_channels=8, expand=16),
+            CnnBlock(in_channels=8, out_channels=16, expand=32),
             nn.MaxPool2d(kernel_size=(3,3)),
-            CnnBlock(in_channels=8, out_channels=32, expand=64),
             CnnBlock(in_channels=32, out_channels=64, expand=128),
-            nn.MaxPool2d(kernel_size=(3,3)),
             CnnBlock(in_channels=64, out_channels=128, expand=256),
+            nn.MaxPool2d(kernel_size=(3,3)),
             CnnBlock(in_channels=128, out_channels=256, expand=512),
+            CnnBlock(in_channels=256, out_channels=512, expand=1024),
             MaxOverTimePooling(),
             nn.Flatten(),
+            nn.Linear(in_features=512, out_features=256),
+            nn.Dropout(0.5),
+            nn.ReLU6(),
             nn.Linear(in_features=256, out_features=128),
-            nn.Dropout(0.2),
             nn.ReLU6(),
             nn.Linear(in_features=128, out_features=64),
+            nn.Dropout(0.5),
             nn.ReLU6(),
             nn.Linear(in_features=64, out_features=32),
-            nn.Dropout(0.2),
             nn.ReLU6(),
             nn.Linear(in_features=32, out_features=1),
             nn.Sigmoid()
-            # nn.Softmax(dim=1)
         )
         self.loss_fn = loss_fn
 
