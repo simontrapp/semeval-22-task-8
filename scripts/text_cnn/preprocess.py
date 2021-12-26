@@ -98,7 +98,7 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
         test_scores_raw = np.load(test_scores_raw_out, allow_pickle=True)
 
     use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
-    use_batch_size = 64
+    use_batch_size = 16
 
     # train dataset
     training_sentences_1, train_keywords_1, training_sentences_2, train_keywords_2 = load_sentences(training_ids,
