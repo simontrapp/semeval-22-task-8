@@ -13,7 +13,7 @@ from torch.optim import SGD
 from torch.utils.data import DataLoader
 from torchinfo import summary
 from torch.utils.tensorboard import SummaryWriter
-import tensorflow_hub as hub
+#import tensorflow_hub as hub
 from tensorflow_text import SentencepieceTokenizer
 
 import time
@@ -63,8 +63,8 @@ es_epochs = 20
 ---------------------------------------------------------------------
 """
 
-bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
-use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
+#bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
+#use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
 
 train_ds, training_scores, training_ids, \
 eval_ds, evaluation_scores, evaluation_ids, \
@@ -81,9 +81,9 @@ print(f'gpu: {res.gpu}%, gpu-mem: {res.memory}%')
 print(f"Finished reading the data!\n# training sentence pairs: {len(train_ds)}\n"
       f"# evaluation sentence pairs: {len(eval_ds)}\n"
       f"# test sentence pairs: {len(test_ds)}")
-train_ds = SentenceDataset(train_ds, training_scores, bert)
-val_ds = SentenceDataset(eval_ds, evaluation_scores, bert)
-test_ds = SentenceDataset(test_ds, test_scores_normalized, bert)
+train_ds = SentenceDataset(train_ds, training_scores)
+val_ds = SentenceDataset(eval_ds, evaluation_scores)
+test_ds = SentenceDataset(test_ds, test_scores_normalized)
 
 train_dl = DataLoader(train_ds, shuffle=True, batch_size=batch_size, collate_fn=my_collate)
 val_dl = DataLoader(val_ds, shuffle=False, batch_size=batch_size, collate_fn=my_collate)

@@ -7,11 +7,10 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 class SentenceDataset(Dataset):
 
-    def __init__(self, dataset, label, encoder):
+    def __init__(self, dataset, label):
         super(SentenceDataset, self).__init__()
         self.dataset = dataset
         self.labels = label
-        self.encoder = encoder
         self.len = len(dataset)
 
     def __len__(self):
