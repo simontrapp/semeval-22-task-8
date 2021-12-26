@@ -15,7 +15,7 @@ from torchinfo import summary
 from torch.utils.tensorboard import SummaryWriter
 #import tensorflow_hub as hub
 import tensorflow as tf
-gpu_options = tf.GPUOptions(per_process_gpu_memory_fraction=0.333)
+gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.333)
 
 sess = tf.Session(config=tf.ConfigProto(gpu_options=gpu_options))
 from tensorflow_text import SentencepieceTokenizer
