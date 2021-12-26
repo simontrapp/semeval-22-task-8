@@ -103,23 +103,20 @@ best_index = 0
 epochs_not_improved = 0
 
 for t in range(epochs):
-    try:
-        start = time.time()
-        train(network, loss_fn, optimizer, device, train_dl, writer, epoch=t)
-        metric = validate(network, device, val_dl, save_predictions=True,
-                          result_path=os.path.join(log_path, f"predictions_epoch_{t}.csv"),
-                          pbar_description=f"Validate epoch {t}")
-        if metric <= best_metric:
-            epochs_not_improved += 1
-            if epochs_not_improved >= es_epochs:
-                break
-        else:
-            best_index = t
-            best_metric = metric
-            epochs_not_improved = 0
-        end = time.time()
-    except:
-        torch.cuda.memory_summary(device=None, abbreviated=False)
+    start = time.time()
+    train(network, loss_fn, optimizer, device, train_dl, writer, epoch=t)
+    metric = validate(network, device, val_dl, save_predictions=True,
+                      result_path=os.path.join(log_path, f"predictions_epoch_{t}.csv"),
+                      pbar_description=f"Validate epoch {t}")
+    if metric <= best_metric:
+        epochs_not_improved += 1
+        if epochs_not_improved >= es_epochs:
+            break
+    else:
+        best_index = t
+        best_metric = metric
+        epochs_not_improved = 0
+    end = time.time()
 
 writer.flush()
 writer.close()
