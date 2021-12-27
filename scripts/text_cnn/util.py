@@ -28,9 +28,9 @@ def process_json_to_keywords(path: str):
     with open(path, 'r') as file:
         article_data = json.load(file)
         kt = []
-        kt.extend(article_data['title'])
-        kt.extend(article_data['description'])
-        kt.extend(article_data['publish_date'])
+        kt.append(article_data['title'])
+        kt.append(article_data['description'])
+        kt.append(article_data['publish_date'])
         kt.extend(article_data['keywords'])
         kt.extend(article_data['tags'])
         return kt
