@@ -13,6 +13,7 @@ import tensorflow_hub as hub
 from tensorflow_text import SentencepieceTokenizer
 
 nltk.download('punkt')
+SIMILARITY_TYPE = 'arccosine'
 
 
 def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, validation_ratio=0.2, test_ratio=0.2):
@@ -144,7 +145,7 @@ def add_keywords(dataset, keywords_1, keywords_2):
         if (len(k1) == 0) or (len(k2) == 0):
             dataset[index] = np.pad(np.array([dataset[index]]), ((0, 1), (0, 0), (0, 0)))
             continue
-        sim = cosine_similarity(X=k1, Y=k2)
+        sim = create_similarity_matrix(k1, k2, type=SIMILARITY_TYPE)
         np.fill_diagonal(sim, 0)
         max_w = max(np.max([sim.shape[0], dataset[index].shape[0]]), 20)
         max_h = max(np.max([sim.shape[1], dataset[index].shape[1]]), 20)
@@ -160,12 +161,31 @@ def add_keywords(dataset, keywords_1, keywords_2):
 def embeddings_2_similarity(s1, s2):
     dataset = []
     for (s1, s2) in tqdm(zip(s1, s2)):
-        e1 = cosine_similarity(X=s1, Y=s2)
+        e1 = create_similarity_matrix(s1, s2, type=SIMILARITY_TYPE)
         np.fill_diagonal(e1, 0)
         dataset.append(e1)
     del s1
     del s2
     return dataset
+
+
+def create_similarity_matrix(embeddings_1, embeddings_2, type='cosine'):
+    if 'cosine' == type:
+        return create_cosine_similarity_matrix(embeddings_1, embeddings_2)
+    if 'arccosine' == type:
+        return create_arccosine_similarity_matrix(embeddings_1, embeddings_2)
+    else:
+        raise Exception('e')
+
+
+# arccos based text similarity (Yang et al. 2019; Cer et al. 2019)
+def create_cosine_similarity_matrix(embeddings_1, embeddings_2):
+    return cosine_similarity(X=embeddings_1, Y=embeddings_2)
+
+
+# arccos based text similarity (Yang et al. 2019; Cer et al. 2019)
+def create_arccosine_similarity_matrix(embeddings_1, embeddings_2):
+    return 1 - np.arccos(cosine_similarity(embeddings_1, embeddings_2)) / np.pi
 
 
 def sentences_2_embedding(sentences, use_batch_size, use_model):
