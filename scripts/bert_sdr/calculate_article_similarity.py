@@ -127,6 +127,6 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
 if __name__ == "__main__":
     nltk.download('punkt')
     sbert_model = sentence_transformers.SentenceTransformer('paraphrase-multilingual-mpnet-base-v2', device='cpu')
-    sbert_model.max_seq_length = 160
+    sbert_model.max_seq_length = 512
     universal_sentence_encoder_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
     compute_similarities(DATA_DIR, CSV_PATH, OUTPUT_CSV_PATH, sbert_model, universal_sentence_encoder_model)
