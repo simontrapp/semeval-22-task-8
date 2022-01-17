@@ -4,6 +4,7 @@ import sentence_transformers
 from torch import nn
 import torch
 import numpy as np
+import math
 
 
 def process_json_to_sentences(path: str):
@@ -85,7 +86,19 @@ def ohe2lable(ohe):
 
 # return 0-1 scores to 1-4 form
 def unnormalize_scores(scores: list):
-    return [s * 3 + 1 for s in scores]  # TODO: convert to integer scores ( round() )
+    scores = [s * 3 + 1 for s in scores]  # TODO: convert to integer scores ( round() )
+    scores = [round_to_nearest(s) for s in scores]
+    return scores
+
+
+def round_to_nearest(score):
+    values = [1, 1.33, 1.66, 2, 2.33, 2.66, 3, 3.33, 3.66, 4]
+    for i in range(len(values)-1):
+        diff_smaller = abs(score - values[i])
+        diff_bigger = abs(score - values[i+1])
+        if diff_smaller < diff_bigger:
+            return values[i]
+    return values[-1]
 
 
 def pad_input(data):

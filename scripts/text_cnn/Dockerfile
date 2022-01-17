@@ -21,6 +21,8 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 
 # add the files necessary
 RUN mkdir -p /home/stud/${USER}/data/embeddings
+
+ADD data /home/stud/${USER}/data
 # add the files necessary
 COPY scripts/text_cnn/util.py /home/stud/${USER}/scripts/text_cnn/
 COPY scripts/text_cnn/train.py /home/stud/${USER}/scripts/text_cnn/

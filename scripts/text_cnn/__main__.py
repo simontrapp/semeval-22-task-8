@@ -49,7 +49,7 @@ preprocess = True
 # training parameters
 batch_size = 16
 epochs = 1000
-lr = 0.01
+lr = 0.001
 
 es_epochs = 100
 """
