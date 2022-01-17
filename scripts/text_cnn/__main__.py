@@ -20,6 +20,7 @@ from preprocess import preprocess_data
 from models.lstm import lstm_model
 from models.sim_cnn import SimCnn
 from train import train, validate
+import torch
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 device_pl = "gpu" if device == "cuda" else device
@@ -39,7 +40,7 @@ base_path = os.path.join("..", "..", "data")
 data_path = os.path.join(base_path, "processed", "training_data")
 CSV_PATH = os.path.join(base_path, "semeval-2022_task8_train-data_batch.csv")
 
-evaluation_ratio = 0.2  # ~20% of pairs for evaluation
+evaluation_ratio = 0.3  # ~20% of pairs for evaluation
 create_test_set = False
 test_ratio = 0.01  # ~20% of pairs for testing if desired
 
@@ -47,10 +48,10 @@ preprocess = True
 
 # training parameters
 batch_size = 16
-epochs = 200
-lr = 0.0005
+epochs = 1000
+lr = 0.01
 
-es_epochs = 20
+es_epochs = 100
 """
 ---------------------------------------------------------------------
 |                                                                   |
@@ -59,7 +60,7 @@ es_epochs = 20
 ---------------------------------------------------------------------
 """
 
-#bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
+# bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
 #use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
 
 train_ds, training_scores, training_ids, \
@@ -81,7 +82,7 @@ test_dl = DataLoader(test_ds, shuffle=False, batch_size=batch_size, collate_fn=m
 
 loss_fn = nn.MSELoss().to(device)
 network = SimCnn(loss_fn, device=device).to(device)
-summary(network, input_size=(batch_size, 2, 100, 100))
+summary(network, input_size=(batch_size, 1, 100, 100))
 optimizer = SGD(network.parameters(), lr=lr)
 
 print("Start training model!")
@@ -93,7 +94,6 @@ best_index = 0
 epochs_not_improved = 0
 
 for t in range(epochs):
-    start = time.time()
     train(network, loss_fn, optimizer, device, train_dl, writer, epoch=t)
     metric = validate(network, device, val_dl, save_predictions=True,
                       result_path=os.path.join(log_path, f"predictions_epoch_{t}.csv"),
@@ -106,7 +106,7 @@ for t in range(epochs):
         best_index = t
         best_metric = metric
         epochs_not_improved = 0
-    end = time.time()
+        torch.save(network.state_dict(), os.path.join(log_path, f"epoch_{t}"))
 
 writer.flush()
 writer.close()

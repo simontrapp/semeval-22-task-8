@@ -9,8 +9,10 @@ import sys
 from time import time
 from sklearn.metrics.pairwise import cosine_similarity
 
-import tensorflow_hub as hub
-from tensorflow_text import SentencepieceTokenizer
+# import tensorflow_hub as hub
+# from tensorflow_text import SentencepieceTokenizer
+
+from sentence_transformers import SentenceTransformer
 
 nltk.download('punkt')
 SIMILARITY_TYPE = 'arccosine'
@@ -98,42 +100,43 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
         test_scores_normalized = np.load(test_scores_normalized_out, allow_pickle=True)
         test_scores_raw = np.load(test_scores_raw_out, allow_pickle=True)
 
-    use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
+    # use_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
     use_batch_size = 16
+    bert = SentenceTransformer('paraphrase-multilingual-mpnet-base-v2')
 
     # train dataset
     training_sentences_1, train_keywords_1, training_sentences_2, train_keywords_2 = load_sentences(training_ids,
                                                                                                     data_dir,
                                                                                                     description="Load train sentences")
-    train_s1 = sentences_2_embedding(training_sentences_1, use_batch_size, use_model)
-    train_s2 = sentences_2_embedding(training_sentences_2, use_batch_size, use_model)
-    train_k1 = sentences_2_embedding(train_keywords_1, use_batch_size, use_model)
-    train_k2 = sentences_2_embedding(train_keywords_2, use_batch_size, use_model)
+    train_s1 = sentences_2_embedding(training_sentences_1, use_batch_size, bert)
+    train_s2 = sentences_2_embedding(training_sentences_2, use_batch_size, bert)
+    # train_k1 = sentences_2_embedding(train_keywords_1, use_batch_size, use_model)
+    # train_k2 = sentences_2_embedding(train_keywords_2, use_batch_size, use_model)
     train_ds = embeddings_2_similarity(train_s1, train_s2)
-    add_keywords(train_ds, train_k1, train_k2)
+    # add_keywords(train_ds, train_k1, train_k2)
 
     # validation dataset
     evaluation_sentences_1, evaluation_keywords_1, evaluation_sentences_2, evaluation_keywords_2 = load_sentences(
         evaluation_ids, data_dir,
         description="Load validation sentences")
-    eval_s1 = sentences_2_embedding(evaluation_sentences_1, use_batch_size, use_model)
-    eval_s2 = sentences_2_embedding(evaluation_sentences_2, use_batch_size, use_model)
-    eval_k1 = sentences_2_embedding(evaluation_keywords_1, use_batch_size, use_model)
-    eval_k2 = sentences_2_embedding(evaluation_keywords_2, use_batch_size, use_model)
+    eval_s1 = sentences_2_embedding(evaluation_sentences_1, use_batch_size, bert)
+    eval_s2 = sentences_2_embedding(evaluation_sentences_2, use_batch_size, bert)
+    # eval_k1 = sentences_2_embedding(evaluation_keywords_1, use_batch_size, use_model)
+    # eval_k2 = sentences_2_embedding(evaluation_keywords_2, use_batch_size, use_model)
     eval_ds = embeddings_2_similarity(eval_s1, eval_s2)
-    add_keywords(eval_ds, eval_k1, eval_k2)
+    # add_keywords(eval_ds, eval_k1, eval_k2)
 
     # test dataset
     test_sentences_1, test_keywords_1, test_sentences_2, test_keywords_2 = load_sentences(test_ids, data_dir,
                                                                                           description="Load test sentences")
-    test_s1 = sentences_2_embedding(test_sentences_1, use_batch_size, use_model)
-    test_s2 = sentences_2_embedding(test_sentences_2, use_batch_size, use_model)
-    test_k1 = sentences_2_embedding(test_keywords_1, use_batch_size, use_model)
-    test_k2 = sentences_2_embedding(test_keywords_2, use_batch_size, use_model)
+    test_s1 = sentences_2_embedding(test_sentences_1, use_batch_size, bert)
+    test_s2 = sentences_2_embedding(test_sentences_2, use_batch_size, bert)
+    # test_k1 = sentences_2_embedding(test_keywords_1, use_batch_size, use_model)
+    # test_k2 = sentences_2_embedding(test_keywords_2, use_batch_size, use_model)
     test_ds = embeddings_2_similarity(test_s1, test_s2)
-    add_keywords(test_ds, test_k1, test_k2)
+    # add_keywords(test_ds, test_k1, test_k2)
 
-    del use_model
+    del bert
 
     return train_ds, training_scores, training_ids, \
            eval_ds, evaluation_scores, evaluation_ids, \
@@ -191,7 +194,7 @@ def create_arccosine_similarity_matrix(embeddings_1, embeddings_2):
 def sentences_2_embedding(sentences, use_batch_size, use_model):
     train_s1 = [None] * len(sentences)
     for index, x in enumerate(tqdm(sentences)):
-        train_s1[index] = create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
+        train_s1[index] = use_model.encode(x)# create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
     del sentences
     return train_s1
 
