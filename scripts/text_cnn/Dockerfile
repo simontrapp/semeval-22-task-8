@@ -20,13 +20,18 @@ RUN pip3 install --no-cache-dir torch==1.10.0+cu113 torchvision==0.11.1+cu113 to
 RUN pip3 install --no-cache-dir -r requirements.txt
 
 # add the files necessary
-ADD data /home/stud/${USER}/data
+RUN mkdir -p /home/stud/${USER}/data/embeddings
+# add the files necessary
 COPY scripts/text_cnn/util.py /home/stud/${USER}/scripts/text_cnn/
+COPY scripts/text_cnn/train.py /home/stud/${USER}/scripts/text_cnn/
 COPY scripts/text_cnn/preprocess.py /home/stud/${USER}/scripts/text_cnn/
-COPY scripts/text_cnn/pl_network.py /home/stud/${USER}/scripts/text_cnn/
 COPY scripts/text_cnn/data_set.py /home/stud/${USER}/scripts/text_cnn/
-COPY scripts/text_cnn/data_module.py /home/stud/${USER}/scripts/text_cnn/
 COPY scripts/text_cnn/__main__.py /home/stud/${USER}/scripts/text_cnn/
+
+COPY scripts/text_cnn/models/text_cnn.py /home/stud/${USER}/scripts/text_cnn/models/
+COPY scripts/text_cnn/models/lstm.py /home/stud/${USER}/scripts/text_cnn/models/
+COPY scripts/text_cnn/models/sim_cnn.py /home/stud/${USER}/scripts/text_cnn/models/
+COPY scripts/text_cnn/models/__init__.py /home/stud/${USER}/scripts/text_cnn/models/
 
 RUN chown -R stud${USER} /home/stud/${USER}
 
