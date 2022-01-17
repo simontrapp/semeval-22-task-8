@@ -5,12 +5,6 @@ from torch.optim import SGD
 from torch.utils.data import DataLoader
 from torchinfo import summary
 from torch.utils.tensorboard import SummaryWriter
-#import tensorflow_hub as hub
-import tensorflow as tf
-
-gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.333)
-sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
-from tensorflow_text import SentencepieceTokenizer
 
 import time
 
