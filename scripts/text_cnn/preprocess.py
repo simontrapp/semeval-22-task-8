@@ -15,7 +15,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sentence_transformers import SentenceTransformer
 
 nltk.download('punkt')
-SIMILARITY_TYPE = 'arccosine'
+SIMILARITY_TYPE = 'cosine'
 
 
 def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, validation_ratio=0.2, test_ratio=0.2):
