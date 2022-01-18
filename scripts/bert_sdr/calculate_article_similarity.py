@@ -58,7 +58,7 @@ def create_universal_sentence_encoder_embeddings(use_model, input_sentences: lis
         return use_model(input_sentences)
 
 
-def append_output_sample(output_data: dict, pair_id_1: int, pair_id_2: int, ov_score: float, ss_2_1: float, ss_1_2: float, us_2_1: float, us_1_2: float):
+def append_output_sample(output_data: dict, pair_id_1: int, pair_id_2: int, ov_score: float, ss_2_1: float, ss_1_2: float, us_2_1: float, us_1_2: float, tcs: float):
     output_data[util.DATA_PAIR_ID_1].append(pair_id_1)
     output_data[util.DATA_PAIR_ID_2].append(pair_id_2)
     output_data[util.DATA_OVERALL_SCORE].append(ov_score)
@@ -66,9 +66,10 @@ def append_output_sample(output_data: dict, pair_id_1: int, pair_id_2: int, ov_s
     output_data[util.DATA_BERT_SIM_12].append(ss_1_2)
     output_data[util.DATA_USE_SIM_21].append(us_2_1)
     output_data[util.DATA_USE_SIM_12].append(us_1_2)
+    output_data[util.DATA_TEXT_CNN_SCORE].append(tcs)
 
 
-def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert_embedding_model: dict, use_embedding_model):
+def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert_embedding_model: dict, use_embedding_model, is_eval: bool = False):
     output_data = {
         util.DATA_PAIR_ID_1: [],
         util.DATA_PAIR_ID_2: [],
@@ -76,7 +77,8 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
         util.DATA_BERT_SIM_21: [],
         util.DATA_BERT_SIM_12: [],
         util.DATA_USE_SIM_21: [],
-        util.DATA_USE_SIM_12: []
+        util.DATA_USE_SIM_12: [],
+        util.DATA_TEXT_CNN_SCORE: []
     }
     print("Start reading the data...")
     sentence_pairs = pd.read_csv(data_csv)
@@ -110,12 +112,19 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
                     # create scores
                     sbert_sim_2_to_1, sbert_sim_1_to_2 = util.embeddings_to_scores(sbert_embeddings_1, sbert_embeddings_2, similarity_type='cosine')
                     use_sim_2_to_1, use_sim_1_to_2 = util.embeddings_to_scores(use_embeddings_1, use_embeddings_2, similarity_type='arccosine')
+                    text_cnn_score =    # TODO: implement felix's model
                     # append result to output file
                     pair_id_1 = int(pair_ids[0])
                     pair_id_2 = int(pair_ids[1])
-                    append_output_sample(output_data, pair_id_1, pair_id_2, overall_score, sbert_sim_2_to_1, sbert_sim_1_to_2, use_sim_2_to_1, use_sim_1_to_2)
+                    append_output_sample(output_data, pair_id_1, pair_id_2, overall_score, sbert_sim_2_to_1, sbert_sim_1_to_2, use_sim_2_to_1, use_sim_1_to_2, text_cnn_score)
                     print(f"Processed {index}: #sentences_1: {len(sentences_1)}, #sentences_2: {len(sentences_2)}")
                     del sentences_1, sentences_2, sbert_embeddings_1, sbert_embeddings_2, use_embeddings_1, use_embeddings_2
+                elif is_eval:
+                    print("EVAL ERROR: sentence amount of one article is zero!")
+                    raise ValueError('eval error: sentence amount of one article is zero!')
+            elif is_eval:
+                print("EVAL ERROR: article file doesn't exist!")
+                raise ValueError('eval error: file doesnt exist!')
     except AssertionError as e:
         print(f"Error: {e}")
     except:

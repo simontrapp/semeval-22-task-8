@@ -9,6 +9,7 @@ DATA_BERT_SIM_21 = 'bert_sentence_similarity_2_to_1'
 DATA_BERT_SIM_12 = 'bert_sentence_similarity_1_to_2'
 DATA_USE_SIM_21 = 'universal_sentence_encoder_similarity_2_to_1'
 DATA_USE_SIM_12 = 'universal_sentence_encoder_similarity_1_to_2'
+DATA_TEXT_CNN_SCORE = 'text_cnn_score'
 
 
 # cosine scores for all embedding pairs
