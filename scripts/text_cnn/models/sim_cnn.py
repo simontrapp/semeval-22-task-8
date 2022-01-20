@@ -2,25 +2,25 @@ import torch
 from torch import nn
 from util import MaxOverTimePooling
 
+
 class SimCnn(nn.Module):
     def __init__(self, loss_fn, device="cuda"):
         super(SimCnn, self).__init__()
 
-        self.in_3 = SimCnnPart(kernel_size=3, device=device)
-        self.in_6 = SimCnnPart(kernel_size=6, device=device)
-        self.in_9 = SimCnnPart(kernel_size=9, device=device)
+        self.in_3 = SimCnnPart(kernel_size=3, amount=5)
+        self.in_6 = SimCnnPart(kernel_size=6, amount=5)
+        self.in_9 = SimCnnPart(kernel_size=9, amount=5)
 
-        self.in_2 = SimCnnPart(kernel_size=2, device=device)
-        self.in_4 = SimCnnPart(kernel_size=4, device=device)
-        self.in_8 = SimCnnPart(kernel_size=8, device=device)
-
+        self.in_2 = SimCnnPart(kernel_size=2, amount=5)
+        self.in_4 = SimCnnPart(kernel_size=4, amount=5)
+        self.in_8 = SimCnnPart(kernel_size=8, amount=5)
 
         self.out = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(in_features=1536, out_features=1024),
-            nn.Dropout(0.5),
-            nn.ReLU6(),
-            nn.Linear(in_features=1024, out_features=512),
+            # nn.Linear(in_features=1920, out_features=1024),
+            # nn.Dropout(0.5),
+            # nn.ReLU6(),
+            nn.Linear(in_features=960, out_features=512),
             nn.ReLU6(),
             nn.Linear(in_features=512, out_features=256),
             nn.Dropout(0.5),
@@ -48,31 +48,60 @@ class SimCnn(nn.Module):
         x = torch.cat([x_3, x_6, x_9, x_2, x_4, x_8], dim=1)
         return self.out(x)
 
+
 class SimCnnPart(nn.Module):
-    def __init__(self, kernel_size,  device="cuda"):
+    def __init__(self, kernel_size, amount):
         super(SimCnnPart, self).__init__()
 
-        self.final_network = nn.Sequential(
-            CnnBlock(in_channels=1, out_channels=32, expand=128, kernel_size=kernel_size),
-            nn.MaxPool2d(kernel_size=(2, 2)),
-            nn.Dropout(0.1),
-            CnnBlock(in_channels=32, out_channels=64, expand=128, kernel_size=kernel_size),
-            nn.MaxPool2d(kernel_size=(2, 2)),
-            nn.Dropout(0.2),
-            CnnBlock(in_channels=64, out_channels=128, expand=256, kernel_size=kernel_size),
-            nn.MaxPool2d(kernel_size=(2, 2)),
-            nn.Dropout(0.2),
-            CnnBlock(in_channels=128, out_channels=256, expand=512, kernel_size=kernel_size),
-            nn.Dropout(0.3),
+        self.networks = [SimCnnSubPart(kernel_size=kernel_size)] * amount
+
+        # CnnBlock(in_channels=1, out_channels=128, expand=256, kernel_size=(kernel_size,100)),
+        # nn.MaxPool2d(kernel_size=(2, 1)),
+        # nn.Dropout(0.1),
+        # CnnBlock(in_channels=32, out_channels=64, expand=128, kernel_size=kernel_size),
+        # nn.MaxPool2d(kernel_size=(2, 2)),
+        # nn.Dropout(0.2),
+        # CnnBlock(in_channels=64, out_channels=128, expand=256, kernel_size=kernel_size),
+        # nn.MaxPool2d(kernel_size=(2, 2)),
+        # nn.Dropout(0.2),
+        # CnnBlock(in_channels=128, out_channels=256, expand=512, kernel_size=kernel_size),
+        # nn.Dropout(0.3),
+        # MaxOverTimePooling(),
+
+    def forward(self, x):
+        x_1 = [n(x) for n in self.networks]
+        return torch.cat(x_1, dim=1)
+
+
+class SimCnnSubPart(nn.Module):
+    def __init__(self, kernel_size):
+        super(SimCnnSubPart, self).__init__()
+        self.network_1 = nn.Sequential(
+            nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(100, kernel_size)),
+            nn.BatchNorm2d(64),
+            nn.ReLU6(),
             MaxOverTimePooling(),
+            nn.Flatten(),
+        # )
+        # self.n_2 = nn.Sequential(
+            # nn.Linear(in_features=(100 - kernel_size + 1), out_features=64),
+            # nn.ReLU6(),
+            # nn.Dropout(0.5),
+            nn.Linear(in_features=64, out_features=64),
+            nn.Dropout(0.5),
+            nn.ReLU6(),
+            nn.Linear(in_features=64, out_features=32),
+            nn.ReLU6(),
         )
 
     def forward(self, x):
-        return self.final_network(x)
+        return self.network_1(x)
+        # x = self.n_2(x)
+        # return x
 
 
 class CnnBlock(nn.Module):
-    def __init__(self, in_channels: int, out_channels: int, kernel_size,  expand: int):
+    def __init__(self, in_channels: int, out_channels: int, kernel_size, expand: int):
         super(CnnBlock, self).__init__()
 
         self.c1 = nn.Sequential(

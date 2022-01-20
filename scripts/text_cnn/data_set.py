@@ -29,8 +29,8 @@ class SentenceDataset(Dataset):
 
 def my_collate(batch):
     data = [item[0].numpy() for item in batch]
-    max_w = max(np.max([x.shape[0] for x in data]),20)
-    max_h = max(np.max([x.shape[1] for x in data]),20)
+    max_w = 100# max(np.max([x.shape[0] for x in data]),20)
+    max_h = 100#max(np.max([x.shape[1] for x in data]),20)
     data = [np.pad(x, ((0, max_w - x.shape[0]), (0, max_h - x.shape[1]))) for x in data]
     [t.resize((1,max_w, max_h)) for t in data]
     target = np.array([item[1].numpy() for item in batch])
