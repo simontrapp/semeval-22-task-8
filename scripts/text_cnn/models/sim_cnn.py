@@ -7,20 +7,22 @@ class SimCnn(nn.Module):
     def __init__(self, loss_fn, device="cuda"):
         super(SimCnn, self).__init__()
 
+        self.in_2 = SimCnnPart(kernel_size=2, amount=5)
         self.in_3 = SimCnnPart(kernel_size=3, amount=5)
+        self.in_4 = SimCnnPart(kernel_size=4, amount=5)
+        self.in_5 = SimCnnPart(kernel_size=5, amount=5)
         self.in_6 = SimCnnPart(kernel_size=6, amount=5)
+        self.in_7 = SimCnnPart(kernel_size=7, amount=5)
+        self.in_8 = SimCnnPart(kernel_size=8, amount=5)
         self.in_9 = SimCnnPart(kernel_size=9, amount=5)
 
-        self.in_2 = SimCnnPart(kernel_size=2, amount=5)
-        self.in_4 = SimCnnPart(kernel_size=4, amount=5)
-        self.in_8 = SimCnnPart(kernel_size=8, amount=5)
 
         self.out = nn.Sequential(
             nn.Flatten(),
-            # nn.Linear(in_features=1920, out_features=1024),
-            # nn.Dropout(0.5),
-            # nn.ReLU6(),
-            nn.Linear(in_features=960, out_features=512),
+            nn.Linear(in_features=2056, out_features=1024),
+            nn.ReLU6(),
+            nn.Dropout(0,5),
+            nn.Linear(in_features=1024, out_features=512),
             nn.ReLU6(),
             nn.Linear(in_features=512, out_features=256),
             nn.Dropout(0.5),
@@ -39,13 +41,15 @@ class SimCnn(nn.Module):
         self.loss_fn = loss_fn
 
     def forward(self, x):
-        x_3 = self.in_3(x)
-        x_6 = self.in_6(x)
-        x_9 = self.in_9(x)
         x_2 = self.in_2(x)
+        x_3 = self.in_3(x)
         x_4 = self.in_4(x)
+        x_5 = self.in_5(x)
+        x_6 = self.in_6(x)
         x_8 = self.in_8(x)
-        x = torch.cat([x_3, x_6, x_9, x_2, x_4, x_8], dim=1)
+        x_7 = self.in_7(x)
+        x_9 = self.in_9(x)
+        x = torch.cat([x_2, x_3, x_4, x_5, x_6, x_7, x_8, x_9], dim=1)
         return self.out(x)
 
 
@@ -80,7 +84,7 @@ class SimCnnSubPart(nn.Module):
     def __init__(self, kernel_size, device='cuda'):
         super(SimCnnSubPart, self).__init__()
         self.network_1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(100, kernel_size)),
+            nn.Conv2d(in_channels=1, out_channels=128, kernel_size=(100, kernel_size)),
             nn.BatchNorm2d(64),
             nn.ReLU6(),
             MaxOverTimePooling(),
@@ -90,10 +94,10 @@ class SimCnnSubPart(nn.Module):
             # nn.Linear(in_features=(100 - kernel_size + 1), out_features=64),
             # nn.ReLU6(),
             # nn.Dropout(0.5),
-            nn.Linear(in_features=64, out_features=64),
+            nn.Linear(in_features=128, out_features=64),
             nn.Dropout(0.5),
             nn.ReLU6(),
-            nn.Linear(in_features=64, out_features=32),
+            nn.Linear(in_features=64, out_features=64),
             nn.ReLU6(),
         )
 
