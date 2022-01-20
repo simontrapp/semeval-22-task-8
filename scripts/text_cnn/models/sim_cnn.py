@@ -50,11 +50,14 @@ class SimCnn(nn.Module):
 
 
 class SimCnnPart(nn.Module):
-    def __init__(self, kernel_size, amount):
+    def __init__(self, kernel_size, amount, device='cuda'):
         super(SimCnnPart, self).__init__()
 
-        self.networks = [SimCnnSubPart(kernel_size=kernel_size)] * amount
-
+        self.n1 = SimCnnSubPart(kernel_size=kernel_size)
+        self.n2 = SimCnnSubPart(kernel_size=kernel_size)
+        self.n3 = SimCnnSubPart(kernel_size=kernel_size)
+        self.n4 = SimCnnSubPart(kernel_size=kernel_size)
+        self.n5 = SimCnnSubPart(kernel_size=kernel_size)
         # CnnBlock(in_channels=1, out_channels=128, expand=256, kernel_size=(kernel_size,100)),
         # nn.MaxPool2d(kernel_size=(2, 1)),
         # nn.Dropout(0.1),
@@ -69,12 +72,12 @@ class SimCnnPart(nn.Module):
         # MaxOverTimePooling(),
 
     def forward(self, x):
-        x_1 = [n(x) for n in self.networks]
+        x_1 = [self.n1(x), self.n2(x), self.n3(x), self.n4(x), self.n5(x)]
         return torch.cat(x_1, dim=1)
 
 
 class SimCnnSubPart(nn.Module):
-    def __init__(self, kernel_size):
+    def __init__(self, kernel_size, device='cuda'):
         super(SimCnnSubPart, self).__init__()
         self.network_1 = nn.Sequential(
             nn.Conv2d(in_channels=1, out_channels=64, kernel_size=(100, kernel_size)),
@@ -82,8 +85,8 @@ class SimCnnSubPart(nn.Module):
             nn.ReLU6(),
             MaxOverTimePooling(),
             nn.Flatten(),
-        # )
-        # self.n_2 = nn.Sequential(
+            # )
+            # self.n_2 = nn.Sequential(
             # nn.Linear(in_features=(100 - kernel_size + 1), out_features=64),
             # nn.ReLU6(),
             # nn.Dropout(0.5),
