@@ -19,9 +19,11 @@ class SimCnn(nn.Module):
 
         self.out = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(in_features=2056, out_features=1024),
+            nn.Linear(in_features=2560, out_features=2048),
             nn.ReLU6(),
-            nn.Dropout(0,5),
+            nn.Linear(in_features=2048, out_features=1024),
+            nn.ReLU6(),
+            nn.Dropout(0.5),
             nn.Linear(in_features=1024, out_features=512),
             nn.ReLU6(),
             nn.Linear(in_features=512, out_features=256),
@@ -84,8 +86,9 @@ class SimCnnSubPart(nn.Module):
     def __init__(self, kernel_size, device='cuda'):
         super(SimCnnSubPart, self).__init__()
         self.network_1 = nn.Sequential(
-            nn.Conv2d(in_channels=1, out_channels=128, kernel_size=(100, kernel_size)),
-            nn.BatchNorm2d(64),
+            CnnBlock(in_channels=1, out_channels=64, kernel_size=kernel_size, expand=64),
+            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(100, kernel_size)),
+            nn.BatchNorm2d(128),
             nn.ReLU6(),
             MaxOverTimePooling(),
             nn.Flatten(),
