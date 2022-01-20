@@ -41,11 +41,11 @@ test_ratio = 0.01  # ~20% of pairs for testing if desired
 preprocess = True
 
 # training parameters
-batch_size = 16
+batch_size = 8
 epochs = 1000
-lr = 0.001
+lr = 0.005
 
-es_epochs = 100
+es_epochs = 20
 """
 ---------------------------------------------------------------------
 |                                                                   |
