@@ -19,3 +19,5 @@ torch-summary
 torchinfo
 
 nvidia-ml-py3
+
+torchmetrics<0.7
