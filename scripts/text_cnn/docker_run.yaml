@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: sim-cnn-big-multilang
+  name: sim-cnn-small-multilang
   namespace: studheinickel
 spec:
   template:
