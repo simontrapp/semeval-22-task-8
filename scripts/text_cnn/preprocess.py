@@ -8,6 +8,7 @@ from tqdm import tqdm
 import sys
 from time import time
 from sklearn.metrics.pairwise import cosine_similarity
+import torch
 
 # import tensorflow_hub as hub
 # from tensorflow_text import SentencepieceTokenizer
@@ -34,13 +35,19 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
 
     training_ids = []
     training_scores = []
+    training_lang_1 = []
+    training_lang_2 = []
 
     evaluation_ids = []
     evaluation_scores = []
+    evaluation_lang_1 = []
+    evaluation_lang_2 = []
 
     test_ids = []
     test_scores_normalized = []
     test_scores_raw = []
+    test_lang_1 = []
+    test_lang_2 = []
 
     if not ids_exist:
 
@@ -71,18 +78,27 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
                 if r < validation_ratio:
                     evaluation_ids.append(pair_id)
                     evaluation_scores.append(score)
+                    evaluation_lang_1.append(row['url1_lang'])
+                    evaluation_lang_2.append(row['url2_lang'])
                 elif create_test_set and r < validation_ratio + test_ratio:
                     test_ids.append(pair_id)
                     test_scores_normalized.append(score)
                     test_scores_raw.append(overall_score)
+                    test_lang_1.append(row['url1_lang'])
+                    test_lang_2.append(row['url2_lang'])
                 else:
                     training_ids.append(pair_id)
                     training_scores.append(score)
+                    training_lang_1.append(row['url1_lang'])
+                    training_lang_2.append(row['url2_lang'])
 
         # save pair ids split
-        pandas.DataFrame({"pair_id": training_ids}).to_csv(training_ids_out, index=False)
-        pandas.DataFrame({"pair_id": evaluation_ids}).to_csv(validation_ids_out, index=False)
-        pandas.DataFrame({"pair_id": test_ids}).to_csv(test_ids_out, index=False)
+        pandas.DataFrame({"pair_id": training_ids, "lang_1": training_lang_1, "lang_2": training_lang_2}).to_csv(
+            training_ids_out, index=False)
+        pandas.DataFrame({"pair_id": evaluation_ids, "lang_1": evaluation_lang_1, "lang_2": evaluation_lang_2}).to_csv(
+            validation_ids_out, index=False)
+        pandas.DataFrame({"pair_id": test_ids, "lang_1": test_lang_1, "lang_2": test_lang_2}).to_csv(test_ids_out,
+                                                                                                     index=False)
 
         # save scores
         np.save(training_scores_out, training_scores)
@@ -91,9 +107,20 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
         np.save(test_scores_raw_out, test_scores_raw)
 
     else:
-        test_ids = pandas.read_csv(test_ids_out)["pair_id"]
-        evaluation_ids = pandas.read_csv(validation_ids_out)["pair_id"]
-        training_ids = pandas.read_csv(training_ids_out)["pair_id"]
+        test_csv = pandas.read_csv(test_ids_out)
+        test_ids = test_csv["pair_id"]
+        test_lang_1 = test_csv["lang_1"]
+        test_lang_2 = test_csv["lang_2"]
+
+        evaluation_csv = pandas.read_csv(validation_ids_out)
+        evaluation_ids = evaluation_csv["pair_id"]
+        evaluation_lang_1 = evaluation_csv["lang_1"]
+        evaluation_lang_2 = evaluation_csv["lang_2"]
+
+        training_csv = pandas.read_csv(training_ids_out)
+        training_ids = training_csv["pair_id"]
+        training_lang_1 = training_csv["lang_1"]
+        training_lang_2 = training_csv["lang_2"]
 
         training_scores = np.load(training_scores_out, allow_pickle=True)
         evaluation_scores = np.load(validation_scores_out, allow_pickle=True)
@@ -108,11 +135,10 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
     training_sentences_1, train_keywords_1, training_sentences_2, train_keywords_2 = load_sentences(training_ids,
                                                                                                     data_dir,
                                                                                                     description="Load train sentences")
-    train_s1 = sentences_2_embedding(training_sentences_1, use_batch_size, bert)
-    train_s2 = sentences_2_embedding(training_sentences_2, use_batch_size, bert)
+
     # train_k1 = sentences_2_embedding(train_keywords_1, use_batch_size, use_model)
     # train_k2 = sentences_2_embedding(train_keywords_2, use_batch_size, use_model)
-    train_ds = embeddings_2_similarity(train_s1, train_s2)
+    train_ds = embeddings_2_similarity(training_sentences_1, training_sentences_2, training_lang_1, training_lang_2)
     # add_keywords(train_ds, train_k1, train_k2)
 
     # validation dataset
@@ -161,10 +187,12 @@ def add_keywords(dataset, keywords_1, keywords_2):
     del keywords_2
 
 
-def embeddings_2_similarity(s1, s2):
+def embeddings_2_similarity(sentence_1, sentence_2, lang_1, lang_2):
     dataset = []
-    for (s1, s2) in tqdm(zip(s1, s2)):
-        e1 = create_similarity_matrix(s1, s2, type=SIMILARITY_TYPE)
+    for (s1, s2, l1, l2) in tqdm(zip(sentence_1, sentence_2, lang_1, lang_2)):
+        emb1 = create_sbert_embeddings(s1, l1,l2)
+        emb2 = create_sbert_embeddings(s2, l1,l2)
+        e1 = create_similarity_matrix(emb1, emb2, type=SIMILARITY_TYPE)
         np.fill_diagonal(e1, 0)
         dataset.append(e1)
     del s1
@@ -191,12 +219,29 @@ def create_arccosine_similarity_matrix(embeddings_1, embeddings_2):
     return 1 - np.arccos(cosine_similarity(embeddings_1, embeddings_2)) / np.pi
 
 
-def sentences_2_embedding(sentences, use_batch_size, use_model):
+def sentences_2_embedding(sentences, use_model, lang):
     train_s1 = [None] * len(sentences)
     for index, x in enumerate(tqdm(sentences)):
-        train_s1[index] = use_model.encode(x)# create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
+        train_s1[index] = use_model.encode(
+            x)  # create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
     del sentences
     return train_s1
+
+
+sbert_models = {  # TODO: implement Dirk's fine-tuned models
+    'default': SentenceTransformer('paraphrase-multilingual-mpnet-base-v2', device='cpu'),
+    'en': SentenceTransformer('all-mpnet-base-v2', device='cpu'),
+    'es': SentenceTransformer('distiluse-base-multilingual-cased-v1', device='cpu'),
+    'fr': SentenceTransformer('sentence-transformers/LaBSE', device='cpu')
+}
+
+
+def create_sbert_embeddings(sentences: list, language_1: str, language_2: str):
+    with torch.no_grad():  # avoid changes to the model
+        if language_1 == language_2 and language_1 in sbert_models:
+            return sbert_models[language_1].encode(sentences)
+        else:
+            return sbert_models['default'].encode(sentences)
 
 
 def load_sentences(pair_ids, data_path, description=""):

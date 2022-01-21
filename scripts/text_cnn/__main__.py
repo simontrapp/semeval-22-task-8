@@ -27,16 +27,16 @@ print("Using {} device".format(device))
 |                                                                   |
 ---------------------------------------------------------------------
 """
-log_path = os.path.join("..", "..", "logs", "sim-cnn-kw")
+log_path = os.path.join("..", "..", "logs", "sim-cnn-big")
 log_path_tb = os.path.join(log_path, "tb_logs")
-log_name = "sim_cnn"
+log_name = "sim_cnn_big"
 base_path = os.path.join("..", "..", "data")
 data_path = os.path.join(base_path, "processed", "training_data")
 CSV_PATH = os.path.join(base_path, "semeval-2022_task8_train-data_batch.csv")
 
-evaluation_ratio = 0.3  # ~20% of pairs for evaluation
-create_test_set = False
-test_ratio = 0.01  # ~20% of pairs for testing if desired
+evaluation_ratio = 0.2  # ~20% of pairs for evaluation
+create_test_set = True
+test_ratio = 0.2  # ~20% of pairs for testing if desired
 
 preprocess = True
 
@@ -45,7 +45,7 @@ batch_size = 8
 epochs = 1000
 lr = 0.05
 
-es_epochs = 20
+es_epochs = 100
 """
 ---------------------------------------------------------------------
 |                                                                   |
@@ -111,7 +111,15 @@ validate(network, device, train_dl, save_predictions=True, ids=training_ids,
          result_path=os.path.join(log_path, "predictions_train.csv"),
          pbar_description="Test network with train data set")
 validate(network, device, val_dl, save_predictions=True, ids=evaluation_ids,
-         result_path=os.path.join(log_path, "predictions_test.csv"),
+         result_path=os.path.join(log_path, "predictions_validation.csv"),
          pbar_description="Test network with validation data set")
+
+network = SimCnn(loss_fn, device=device)
+network.load_state_dict(torch.load(os.path.join(log_path, f"epoch_{best_index}")))
+network.to(device)
+validate(network, device, test_dl, save_predictions=True, ids=test_ids,
+         result_path=os.path.join(log_path, "predictions_test.csv"),
+         pbar_description="Test network with test data set")
+
 # trainer.test(model, module)
 print("Done!")
