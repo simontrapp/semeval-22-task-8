@@ -15,7 +15,7 @@ def train(model, loss_fn, optimizer, device, train_dataloader, writer, epoch=0, 
     num_batches = math.ceil(size / train_dataloader.batch_size)
     model.train()
     pbar = tqdm(train_dataloader, file=sys.stdout)
-    total_loss =0
+    total_loss = 0
     for batch_index, (X, y) in enumerate(pbar):
         pbar.set_description(f"Train epoch {epoch}")
         sys.stdout.flush()
@@ -27,9 +27,7 @@ def train(model, loss_fn, optimizer, device, train_dataloader, writer, epoch=0, 
         optimizer.step()
         total_loss += float(loss)
         writer.add_scalar("Loss/train", float(loss), batch_index + epoch * num_batches)
-        if batch_index % 20 == 0:
-            print("")
-    print(f"Epoch loss is {total_loss/num_batches}")
+    print(f"Epoch loss is {total_loss / num_batches}")
 
 
 def validate(model, device, dataloader, result_path=None, save_predictions=False, ids=None, pbar_description=""):
@@ -44,8 +42,6 @@ def validate(model, device, dataloader, result_path=None, save_predictions=False
         pred = model(X).detach()
         p.extend(pred.detach())
         l.extend(y.detach())
-        if batch_index % 20 == 0:
-            print("")
 
     p = unnormalize_scores([i.item() for i in p])
     l = unnormalize_scores([i.item() for i in l])

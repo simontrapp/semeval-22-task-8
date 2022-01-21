@@ -135,34 +135,20 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
     training_sentences_1, train_keywords_1, training_sentences_2, train_keywords_2 = load_sentences(training_ids,
                                                                                                     data_dir,
                                                                                                     description="Load train sentences")
-
-    # train_k1 = sentences_2_embedding(train_keywords_1, use_batch_size, use_model)
-    # train_k2 = sentences_2_embedding(train_keywords_2, use_batch_size, use_model)
     train_ds = embeddings_2_similarity(training_sentences_1, training_sentences_2, training_lang_1, training_lang_2)
-    # add_keywords(train_ds, train_k1, train_k2)
 
     # validation dataset
     evaluation_sentences_1, evaluation_keywords_1, evaluation_sentences_2, evaluation_keywords_2 = load_sentences(
         evaluation_ids, data_dir,
         description="Load validation sentences")
-    eval_s1 = sentences_2_embedding(evaluation_sentences_1, use_batch_size, bert)
-    eval_s2 = sentences_2_embedding(evaluation_sentences_2, use_batch_size, bert)
-    # eval_k1 = sentences_2_embedding(evaluation_keywords_1, use_batch_size, use_model)
-    # eval_k2 = sentences_2_embedding(evaluation_keywords_2, use_batch_size, use_model)
-    eval_ds = embeddings_2_similarity(eval_s1, eval_s2)
-    # add_keywords(eval_ds, eval_k1, eval_k2)
+    eval_ds = embeddings_2_similarity(evaluation_sentences_1, evaluation_sentences_2, evaluation_lang_1,
+                                      evaluation_lang_2)
 
     # test dataset
     test_sentences_1, test_keywords_1, test_sentences_2, test_keywords_2 = load_sentences(test_ids, data_dir,
                                                                                           description="Load test sentences")
-    test_s1 = sentences_2_embedding(test_sentences_1, use_batch_size, bert)
-    test_s2 = sentences_2_embedding(test_sentences_2, use_batch_size, bert)
-    # test_k1 = sentences_2_embedding(test_keywords_1, use_batch_size, use_model)
-    # test_k2 = sentences_2_embedding(test_keywords_2, use_batch_size, use_model)
-    test_ds = embeddings_2_similarity(test_s1, test_s2)
-    # add_keywords(test_ds, test_k1, test_k2)
+    test_ds = embeddings_2_similarity(test_sentences_1, test_sentences_2, test_lang_1, test_lang_2)
 
-    del bert
 
     return train_ds, training_scores, training_ids, \
            eval_ds, evaluation_scores, evaluation_ids, \
@@ -190,8 +176,8 @@ def add_keywords(dataset, keywords_1, keywords_2):
 def embeddings_2_similarity(sentence_1, sentence_2, lang_1, lang_2):
     dataset = []
     for (s1, s2, l1, l2) in tqdm(zip(sentence_1, sentence_2, lang_1, lang_2)):
-        emb1 = create_sbert_embeddings(s1, l1,l2)
-        emb2 = create_sbert_embeddings(s2, l1,l2)
+        emb1 = create_sbert_embeddings(s1, l1, l2)
+        emb2 = create_sbert_embeddings(s2, l1, l2)
         e1 = create_similarity_matrix(emb1, emb2, type=SIMILARITY_TYPE)
         np.fill_diagonal(e1, 0)
         dataset.append(e1)
@@ -219,13 +205,13 @@ def create_arccosine_similarity_matrix(embeddings_1, embeddings_2):
     return 1 - np.arccos(cosine_similarity(embeddings_1, embeddings_2)) / np.pi
 
 
-def sentences_2_embedding(sentences, use_model, lang):
-    train_s1 = [None] * len(sentences)
+def sentences_2_embedding(sentences, use_model):
+    s = [None] * len(sentences)
     for index, x in enumerate(tqdm(sentences)):
-        train_s1[index] = use_model.encode(
+        s[index] = use_model.encode(
             x)  # create_universal_sentence_encoder_embeddings(use_model, x, batch_size=use_batch_size)
     del sentences
-    return train_s1
+    return s
 
 
 sbert_models = {  # TODO: implement Dirk's fine-tuned models

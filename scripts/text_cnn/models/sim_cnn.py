@@ -7,23 +7,23 @@ class SimCnn(nn.Module):
     def __init__(self, loss_fn, device="cuda"):
         super(SimCnn, self).__init__()
 
-        self.in_2 = SimCnnPart(kernel_size=2, amount=5)
-        self.in_3 = SimCnnPart(kernel_size=3, amount=5)
-        self.in_4 = SimCnnPart(kernel_size=4, amount=5)
-        self.in_5 = SimCnnPart(kernel_size=5, amount=5)
-        self.in_6 = SimCnnPart(kernel_size=6, amount=5)
-        self.in_7 = SimCnnPart(kernel_size=7, amount=5)
-        self.in_8 = SimCnnPart(kernel_size=8, amount=5)
-        self.in_9 = SimCnnPart(kernel_size=9, amount=5)
+        self.in_2 = SimCnnSubPart(kernel_size=2)
+        self.in_3 = SimCnnSubPart(kernel_size=3)
+        self.in_4 = SimCnnSubPart(kernel_size=4)
+        self.in_5 = SimCnnSubPart(kernel_size=5)
+        self.in_6 = SimCnnSubPart(kernel_size=6)
+        self.in_7 = SimCnnSubPart(kernel_size=7)
+        self.in_8 = SimCnnSubPart(kernel_size=8)
+        self.in_9 = SimCnnSubPart(kernel_size=9)
 
 
         self.out = nn.Sequential(
             nn.Flatten(),
-            nn.Linear(in_features=2560, out_features=2048),
-            nn.ReLU6(),
-            nn.Linear(in_features=2048, out_features=1024),
-            nn.ReLU6(),
-            nn.Dropout(0.5),
+            # nn.Linear(in_features=2560, out_features=2048),
+            # nn.ReLU6(),
+            # nn.Linear(in_features=2048, out_features=1024),
+            # nn.ReLU6(),
+            # nn.Dropout(0.5),
             nn.Linear(in_features=1024, out_features=512),
             nn.ReLU6(),
             nn.Linear(in_features=512, out_features=256),
@@ -55,35 +55,37 @@ class SimCnn(nn.Module):
         return self.out(x)
 
 
-class SimCnnPart(nn.Module):
-    def __init__(self, kernel_size, amount, device='cuda'):
-        super(SimCnnPart, self).__init__()
-
-        self.n1 = SimCnnSubPart(kernel_size=kernel_size)
-        self.n2 = SimCnnSubPart(kernel_size=kernel_size)
-        self.n3 = SimCnnSubPart(kernel_size=kernel_size)
-        self.n4 = SimCnnSubPart(kernel_size=kernel_size)
-        self.n5 = SimCnnSubPart(kernel_size=kernel_size)
-
-    def forward(self, x):
-        x_1 = [self.n1(x), self.n2(x), self.n3(x), self.n4(x), self.n5(x)]
-        return torch.cat(x_1, dim=1)
+# class SimCnnPart(nn.Module):
+#     def __init__(self, kernel_size, amount, device='cuda'):
+#         super(SimCnnPart, self).__init__()
+#
+#         self.n1 = SimCnnSubPart(kernel_size=kernel_size)
+#         self.n2 = SimCnnSubPart(kernel_size=kernel_size)
+#         self.n3 = SimCnnSubPart(kernel_size=kernel_size)
+#         self.n4 = SimCnnSubPart(kernel_size=kernel_size)
+#         self.n5 = SimCnnSubPart(kernel_size=kernel_size)
+#
+#     def forward(self, x):
+#         x_1 = [self.n1(x), self.n2(x), self.n3(x), self.n4(x), self.n5(x)]
+#         return torch.cat(x_1, dim=1)
 
 
 class SimCnnSubPart(nn.Module):
     def __init__(self, kernel_size, device='cuda'):
         super(SimCnnSubPart, self).__init__()
         self.network_1 = nn.Sequential(
-            CnnBlock(in_channels=1, out_channels=32, kernel_size=kernel_size, expand=32),
-            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(100, kernel_size)),
-            nn.BatchNorm2d(64),
+            CnnBlock(in_channels=1, out_channels=64, kernel_size=kernel_size, expand=64),
+            nn.Dropout(0.2),
+            CnnBlock(in_channels=64, out_channels=128, kernel_size=kernel_size, expand=128),
+            nn.Conv2d(in_channels=128, out_channels=256, kernel_size=(100, kernel_size)),
+            nn.BatchNorm2d(256),
             nn.ReLU6(),
             MaxOverTimePooling(),
             nn.Flatten(),
-            nn.Linear(in_features=64, out_features=64),
+            nn.Linear(in_features=256, out_features=128),
             nn.Dropout(0.5),
             nn.ReLU6(),
-            nn.Linear(in_features=64, out_features=64),
+            nn.Linear(in_features=128, out_features=128),
             nn.ReLU6(),
         )
 
@@ -122,6 +124,6 @@ class CnnBlock(nn.Module):
     def forward(self, x):
         x = self.c1(x)
         exp = self.c2(x)
-        x = torch.add(x, exp)
+        # x = torch.cat([x, exp], dim=1)
         del exp
         return self.c3(x)
