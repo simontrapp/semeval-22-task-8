@@ -64,18 +64,6 @@ class SimCnnPart(nn.Module):
         self.n3 = SimCnnSubPart(kernel_size=kernel_size)
         self.n4 = SimCnnSubPart(kernel_size=kernel_size)
         self.n5 = SimCnnSubPart(kernel_size=kernel_size)
-        # CnnBlock(in_channels=1, out_channels=128, expand=256, kernel_size=(kernel_size,100)),
-        # nn.MaxPool2d(kernel_size=(2, 1)),
-        # nn.Dropout(0.1),
-        # CnnBlock(in_channels=32, out_channels=64, expand=128, kernel_size=kernel_size),
-        # nn.MaxPool2d(kernel_size=(2, 2)),
-        # nn.Dropout(0.2),
-        # CnnBlock(in_channels=64, out_channels=128, expand=256, kernel_size=kernel_size),
-        # nn.MaxPool2d(kernel_size=(2, 2)),
-        # nn.Dropout(0.2),
-        # CnnBlock(in_channels=128, out_channels=256, expand=512, kernel_size=kernel_size),
-        # nn.Dropout(0.3),
-        # MaxOverTimePooling(),
 
     def forward(self, x):
         x_1 = [self.n1(x), self.n2(x), self.n3(x), self.n4(x), self.n5(x)]
@@ -86,18 +74,13 @@ class SimCnnSubPart(nn.Module):
     def __init__(self, kernel_size, device='cuda'):
         super(SimCnnSubPart, self).__init__()
         self.network_1 = nn.Sequential(
-            CnnBlock(in_channels=1, out_channels=64, kernel_size=kernel_size, expand=64),
-            nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(100, kernel_size)),
-            nn.BatchNorm2d(128),
+            CnnBlock(in_channels=1, out_channels=32, kernel_size=kernel_size, expand=32),
+            nn.Conv2d(in_channels=32, out_channels=64, kernel_size=(100, kernel_size)),
+            nn.BatchNorm2d(64),
             nn.ReLU6(),
             MaxOverTimePooling(),
             nn.Flatten(),
-            # )
-            # self.n_2 = nn.Sequential(
-            # nn.Linear(in_features=(100 - kernel_size + 1), out_features=64),
-            # nn.ReLU6(),
-            # nn.Dropout(0.5),
-            nn.Linear(in_features=128, out_features=64),
+            nn.Linear(in_features=64, out_features=64),
             nn.Dropout(0.5),
             nn.ReLU6(),
             nn.Linear(in_features=64, out_features=64),
