@@ -17,7 +17,7 @@ export NAME="ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak
 alias buildah='buildah --runroot /tmp/$USER/.local/share/containers/runroot --root /tmp/$USER/.local/share/containers/storage/'
 
 echo "Building the container..."
-buildah bud -t ${NAME} -f Dockerfile .
+buildah bud -t ${NAME} -f Dockerfile.update .
 echo "Login to container registry. Username: stud, Password: studregistry."
 buildah login ls6-stud-registry.informatik.uni-wuerzburg.de   # with username `stud` and password `studregistry`
 echo "Pushing container to registry..."
