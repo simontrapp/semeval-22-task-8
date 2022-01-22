@@ -27,7 +27,7 @@ spec:
               nvidia.com/gpu: "2"
               cpu: "10"
               memory: "32Gi"
-          command: ["bash", "-c", "cd /home/stud/heinickel/scripts/text_cnn/ && python3 -u __main__.py"]
+          command: ["bash", "-c", "cd /home/stud/heinickel/scripts/ && python3 -u train_and_evaluate.py"]
           volumeMounts:
             #- mountPath: /home/stud/heinickel/models # directory IN the container
             #  name: localdir-models # matches volume-name from below
