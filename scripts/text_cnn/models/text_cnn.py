@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from util import MaxOverTimePooling
+from ..util import MaxOverTimePooling
 
 
 class TextCnn(nn.Module):

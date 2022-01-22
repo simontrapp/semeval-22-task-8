@@ -93,9 +93,9 @@ def unnormalize_scores(scores: list):
 
 def round_to_nearest(score):
     values = [1, 1.33, 1.66, 2, 2.33, 2.66, 3, 3.33, 3.66, 4]
-    for i in range(len(values)-1):
+    for i in range(len(values) - 1):
         diff_smaller = abs(score - values[i])
-        diff_bigger = abs(score - values[i+1])
+        diff_bigger = abs(score - values[i + 1])
         if diff_smaller < diff_bigger:
             return values[i]
     return values[-1]

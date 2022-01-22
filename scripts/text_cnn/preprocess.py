@@ -149,7 +149,6 @@ def preprocess_data(data_dir, csv_path, result_base_path, create_test_set=True, 
                                                                                           description="Load test sentences")
     test_ds = embeddings_2_similarity(test_sentences_1, test_sentences_2, test_lang_1, test_lang_2)
 
-
     return train_ds, training_scores, training_ids, \
            eval_ds, evaluation_scores, evaluation_ids, \
            test_ds, test_scores_normalized, test_scores_raw, test_ids
@@ -214,15 +213,13 @@ def sentences_2_embedding(sentences, use_model):
     return s
 
 
-sbert_models = {  # TODO: implement Dirk's fine-tuned models
-    'default': SentenceTransformer('paraphrase-multilingual-mpnet-base-v2'),
-    'en': SentenceTransformer('all-mpnet-base-v2'),
-    'es': SentenceTransformer('distiluse-base-multilingual-cased-v1'),
-    'fr': SentenceTransformer('sentence-transformers/LaBSE')
-}
-
-
 def create_sbert_embeddings(sentences: list, language_1: str, language_2: str):
+    sbert_models = {  # TODO: implement Dirk's fine-tuned models
+        'default': SentenceTransformer('paraphrase-multilingual-mpnet-base-v2'),
+        'en': SentenceTransformer('all-mpnet-base-v2'),
+        'es': SentenceTransformer('distiluse-base-multilingual-cased-v1'),
+        'fr': SentenceTransformer('sentence-transformers/LaBSE')
+    }
     with torch.no_grad():  # avoid changes to the model
         if language_1 == language_2 and language_1 in sbert_models:
             return sbert_models[language_1].encode(sentences)

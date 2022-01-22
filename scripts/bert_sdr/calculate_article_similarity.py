@@ -9,6 +9,7 @@ import sentence_transformers
 import tensorflow_hub as hub
 # noinspection PyUnresolvedReferences
 from tensorflow_text import SentencepieceTokenizer
+from tqdm import tqdm
 
 # folder where the web articles were downloaded to
 DATA_DIR = '../../data/processed/train'
@@ -43,12 +44,12 @@ def process_json_to_sentences(path: str, filter_sentence_length: bool = False, m
         return res
 
 
-def create_sbert_embeddings(sbert_model: dict, sentences: list, language_1: str, language_2: str):
+def create_sbert_embeddings(sbert_models: dict, sentences: list, language_1: str, language_2: str):
     with torch.no_grad():  # avoid changes to the model
         if language_1 == language_2 and language_1 in sbert_models:
-            return sbert_model[language_1].encode(sentences, batch_size=4)
+            return sbert_models[language_1].encode(sentences, batch_size=4)
         else:
-            return sbert_model['default'].encode(sentences, batch_size=4)
+            return sbert_models['default'].encode(sentences, batch_size=4)
 
 
 def create_universal_sentence_encoder_embeddings(use_model, input_sentences: list, batch_size: int = 50):
@@ -62,7 +63,7 @@ def create_universal_sentence_encoder_embeddings(use_model, input_sentences: lis
 
 
 def append_output_sample(output_data: dict, pair_id_1: int, pair_id_2: int, ov_score: float, ss_2_1: float,
-                         ss_1_2: float, us_2_1: float, us_1_2: float, tcs: float):
+                         ss_1_2: float, us_2_1: float, us_1_2: float, tcs: float=0.0):
     output_data[DATA_PAIR_ID_1].append(pair_id_1)
     output_data[DATA_PAIR_ID_2].append(pair_id_2)
     output_data[DATA_OVERALL_SCORE].append(ov_score)
@@ -70,7 +71,7 @@ def append_output_sample(output_data: dict, pair_id_1: int, pair_id_2: int, ov_s
     output_data[DATA_BERT_SIM_12].append(ss_1_2)
     output_data[DATA_USE_SIM_21].append(us_2_1)
     output_data[DATA_USE_SIM_12].append(us_1_2)
-    output_data[DATA_TEXT_CNN_SCORE].append(tcs)
+    # output_data[DATA_TEXT_CNN_SCORE].append(tcs)
 
 
 def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert_embedding_model: dict,
@@ -89,7 +90,7 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
     sentence_pairs = pd.read_csv(data_csv)
     # noinspection PyBroadException
     try:
-        for index, row in sentence_pairs.iterrows():
+        for index, row in tqdm(sentence_pairs.iterrows()):
             pair_id = row['pair_id']
             overall_score = row['Overall']
             pair_ids = pair_id.split('_')
@@ -127,7 +128,7 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
                     pair_id_2 = int(pair_ids[1])
                     append_output_sample(output_data, pair_id_1, pair_id_2, overall_score, sbert_sim_2_to_1,
                                          sbert_sim_1_to_2, use_sim_2_to_1, use_sim_1_to_2)  # , text_cnn_score)
-                    print(f"Processed {index}: #sentences_1: {len(sentences_1)}, #sentences_2: {len(sentences_2)}")
+                    # print(f"Processed {index}: #sentences_1: {len(sentences_1)}, #sentences_2: {len(sentences_2)}")
                     del sentences_1, sentences_2, sbert_embeddings_1, sbert_embeddings_2, use_embeddings_1, use_embeddings_2
                 elif is_eval:
                     print("EVAL ERROR: sentence amount of one article is zero!")
@@ -137,8 +138,8 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
                 raise ValueError('eval error: file doesnt exist!')
     except AssertionError as e:
         print(f"Error: {e}")
-    except:
-        print("Error occurred! Saving results...")
+    except Exception as e:
+        print(f"Error occurred! Saving results...\n Exception: {e}")
     finally:
         # save results as csv
         result_df = pd.DataFrame(output_data)

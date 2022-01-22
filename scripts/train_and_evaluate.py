@@ -1,16 +1,21 @@
-import nltk
-import sentence_transformers
-import tensorflow_hub as hub
-
 from bert_sdr.calculate_article_similarity import compute_similarities
 from bert_sdr.train_classifier import train_random_forest, predict_scores
 from text_cnn.train_classifier import train_model, predict_scores as predict_scores_cnn
 
+import nltk
+import sentence_transformers
+import tensorflow_hub as hub
+import tensorflow as tf
+gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.5)
+sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
+
+
+
 # STEP 0: initialize environment
-TRAINING_DATA_CSV_PATH = 'models/sdr_sbert_document_similarities.csv'
-RANDOM_FOREST_FILE = 'models/random_forest_evaluation.joblib'
-EVAL_DATA_CSV_PATH = 'models/sdr_sbert_document_similarities_eval.csv'
-EVAL_DATA_CSV_PATH_CNN = 'models/cnn_document_similarities_eval.csv'
+TRAINING_DATA_CSV_PATH = '../models/sdr_sbert_document_similarities.csv'
+RANDOM_FOREST_FILE = '../models/random_forest_evaluation.joblib'
+EVAL_DATA_CSV_PATH = '../models/sdr_sbert_document_similarities_eval.csv'
+EVAL_DATA_CSV_PATH_CNN = '../models/cnn_document_similarities_eval.csv'
 
 nltk.download('punkt')
 sbert_models = {  # TODO: implement Dirk's fine-tuned models
@@ -29,17 +34,17 @@ compute_similarities('../data/processed/train', '../data/semeval-2022_task8_trai
                      sbert_models, universal_sentence_encoder_model)
 
 # STEP 2: train random forest regressor
-train_random_forest(TRAINING_DATA_CSV_PATH, '../models/random_forest_test.joblib',
-                    True)  # train and evaluate on test set (create visualization/data for paper)
-train_random_forest(TRAINING_DATA_CSV_PATH, RANDOM_FOREST_FILE,
-                    False)  # use the whole data for training the random forest
+#train_random_forest(TRAINING_DATA_CSV_PATH, '../models/random_forest_test.joblib',
+#                    True)  # train and evaluate on test set (create visualization/data for paper)
+#train_random_forest(TRAINING_DATA_CSV_PATH, RANDOM_FOREST_FILE,
+#                    False)  # use the whole data for training the random forest
 
-train_model(TRAINING_DATA_CSV_PATH)
+#train_model(TRAINING_DATA_CSV_PATH)
 
 # STEP 3: process evaluation data
-compute_similarities('../data/processed/eval', '../data/semeval-2022_task8_eval_data_202201.csv', EVAL_DATA_CSV_PATH,
-                     sbert_models, universal_sentence_encoder_model, True)
+#compute_similarities('../data/processed/eval', '../data/semeval-2022_task8_eval_data_202201.csv', EVAL_DATA_CSV_PATH,
+#                     sbert_models, universal_sentence_encoder_model, True)
 
 # STEP 4: predict similarity scores of evaluation data
-predict_scores(RANDOM_FOREST_FILE, EVAL_DATA_CSV_PATH, '../models/predictions.csv')
-predict_scores(RANDOM_FOREST_FILE, EVAL_DATA_CSV_PATH_CNN, '../models/predictions_cnn.csv')
+#predict_scores(RANDOM_FOREST_FILE, EVAL_DATA_CSV_PATH, '../models/predictions.csv')
+#predict_scores_cnn(RANDOM_FOREST_FILE, EVAL_DATA_CSV_PATH_CNN, '../models/predictions_cnn.csv')
