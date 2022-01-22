@@ -2,9 +2,9 @@ import nltk
 import sentence_transformers
 import tensorflow_hub as hub
 
-from .bert_sdr.calculate_article_similarity import compute_similarities
-from .bert_sdr.train_classifier import train_random_forest, predict_scores
-from .text_cnn.train_classifier import train_model, predict_scores as predict_scores_cnn
+from bert_sdr.calculate_article_similarity import compute_similarities
+from bert_sdr.train_classifier import train_random_forest, predict_scores
+from text_cnn.train_classifier import train_model, predict_scores as predict_scores_cnn
 
 # STEP 0: initialize environment
 TRAINING_DATA_CSV_PATH = 'models/sdr_sbert_document_similarities.csv'

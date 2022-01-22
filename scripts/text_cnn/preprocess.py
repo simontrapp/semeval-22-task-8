@@ -2,7 +2,7 @@ import numpy as np
 import os
 import pandas
 import random
-from util import lable2ohe, process_json_to_sentences, normalize_score, process_json_to_keywords
+from .util import lable2ohe, process_json_to_sentences, normalize_score, process_json_to_keywords
 import nltk
 from tqdm import tqdm
 import sys
