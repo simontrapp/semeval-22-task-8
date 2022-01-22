@@ -1,4 +1,4 @@
-from scripts.bert_sdr.util import load_data, DATA_PAIR_ID_1, DATA_PAIR_ID_2
+from bert_sdr.util import load_data, DATA_PAIR_ID_1, DATA_PAIR_ID_2
 from .data_set import SentenceDataset, my_collate
 from .models.sim_cnn import SimCnn
 from .train import train, validate
