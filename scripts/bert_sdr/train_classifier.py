@@ -1,27 +1,11 @@
 import pandas
-import util
-from calculate_article_similarity import OUTPUT_CSV_PATH
+from .util import load_data, write_metrics_to_file, DATA_PAIR_ID_1, DATA_PAIR_ID_2
+from .calculate_article_similarity import OUTPUT_CSV_PATH
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
-from sklearn import metrics
 from sklearn.impute import KNNImputer, SimpleImputer
-from scipy.stats import pearsonr
 import joblib
 import matplotlib.pyplot as plt
-
-
-# if knn_imputer = True, compute missing keyword similarities from k nearest neighbors, else fill with zero
-def load_data(data_path: str, knn_imputer: bool = False):
-    preprocessed_data = pandas.read_csv(data_path, na_values=['NULL'])
-    if knn_imputer:
-        imputer = KNNImputer(n_neighbors=3)
-    else:
-        imputer = SimpleImputer(strategy='constant', fill_value=0.0)
-    preprocessed_data = pandas.DataFrame(imputer.fit_transform(preprocessed_data), columns=preprocessed_data.columns)
-    x = preprocessed_data[[util.DATA_BERT_SIM_21, util.DATA_BERT_SIM_12, util.DATA_USE_SIM_21, util.DATA_USE_SIM_12, util.DATA_TEXT_CNN_SCORE]]
-    y = preprocessed_data[util.DATA_OVERALL_SCORE]
-    pairs = preprocessed_data[[util.DATA_PAIR_ID_1, util.DATA_PAIR_ID_2]]
-    return x, y, pairs
 
 
 # load model from .joblib file
@@ -45,11 +29,6 @@ def plot_model(y_labels, y_predictions, pdf_path: str):
     plt.savefig(pdf_path)
 
 
-def write_metrics_to_file(path: str, y_test, y_predictions):
-    with open(f"{path}.txt", 'w') as file:
-        file.write(f"Mean squared error: {metrics.mean_squared_error(y_test, y_predictions)}\n"
-                   f"Mean absolute error: {metrics.mean_absolute_error(y_test, y_predictions)}\n"
-                   f"Pearson correlation coefficient (r, p-value): {pearsonr(y_test, y_predictions)}")
 
 
 def train_random_forest(training_data_path: str, model_path: str, create_test_set: bool = False):
@@ -74,7 +53,8 @@ def predict_scores(model_path: str, test_data_path: str, output_path: str):
     rf_model = load_model(model_path)
     x, y, pairs = load_data(test_data_path)
     predictions = rf_model.predict(x)
-    out_data = pandas.DataFrame(pairs[util.DATA_PAIR_ID_1].combine(pairs[util.DATA_PAIR_ID_2], lambda p1, p2: f"{int(p1)}_{int(p2)}"))
+    out_data = pandas.DataFrame(
+        pairs[DATA_PAIR_ID_1].combine(pairs[DATA_PAIR_ID_2], lambda p1, p2: f"{int(p1)}_{int(p2)}"))
     out_data['prediction'] = predictions
     # noinspection PyTypeChecker
     out_data.to_csv(output_path, header=['pair_id', 'Overall'], index=False)

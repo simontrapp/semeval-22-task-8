@@ -7,7 +7,7 @@ import sys
 import numpy as np
 from sklearn.metrics import mean_squared_error, mean_absolute_error
 from scipy.stats import pearsonr
-from util import unnormalize_scores
+from .util import unnormalize_scores
 
 
 def train(model, loss_fn, optimizer, device, train_dataloader, writer, epoch=0, result_path=None):

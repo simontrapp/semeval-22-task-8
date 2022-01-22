@@ -4,7 +4,7 @@ from util import MaxOverTimePooling
 
 
 class SimCnn(nn.Module):
-    def __init__(self, loss_fn, device="cuda"):
+    def __init__(self):
         super(SimCnn, self).__init__()
 
         self.in_2 = SimCnnSubPart(kernel_size=2)
@@ -15,7 +15,6 @@ class SimCnn(nn.Module):
         self.in_7 = SimCnnSubPart(kernel_size=7)
         self.in_8 = SimCnnSubPart(kernel_size=8)
         self.in_9 = SimCnnSubPart(kernel_size=9)
-
 
         self.out = nn.Sequential(
             nn.Flatten(),
@@ -40,8 +39,6 @@ class SimCnn(nn.Module):
             nn.Sigmoid()
         )
 
-        self.loss_fn = loss_fn
-
     def forward(self, x):
         x_2 = self.in_2(x)
         x_3 = self.in_3(x)
@@ -55,21 +52,6 @@ class SimCnn(nn.Module):
         return self.out(x)
 
 
-# class SimCnnPart(nn.Module):
-#     def __init__(self, kernel_size, amount, device='cuda'):
-#         super(SimCnnPart, self).__init__()
-#
-#         self.n1 = SimCnnSubPart(kernel_size=kernel_size)
-#         self.n2 = SimCnnSubPart(kernel_size=kernel_size)
-#         self.n3 = SimCnnSubPart(kernel_size=kernel_size)
-#         self.n4 = SimCnnSubPart(kernel_size=kernel_size)
-#         self.n5 = SimCnnSubPart(kernel_size=kernel_size)
-#
-#     def forward(self, x):
-#         x_1 = [self.n1(x), self.n2(x), self.n3(x), self.n4(x), self.n5(x)]
-#         return torch.cat(x_1, dim=1)
-
-
 class SimCnnSubPart(nn.Module):
     def __init__(self, kernel_size, device='cuda'):
         super(SimCnnSubPart, self).__init__()
@@ -77,7 +59,7 @@ class SimCnnSubPart(nn.Module):
             # CnnBlock(in_channels=1, out_channels=128, kernel_size=kernel_size, expand=64),
             # nn.Dropout(0.2),
             # CnnBlock(in_channels=64, out_channels=128, kernel_size=kernel_size, expand=128),
-            nn.Conv2d(in_channels=1, out_channels=128, kernel_size=(100, kernel_size)),
+            nn.Conv2d(in_channels=4, out_channels=128, kernel_size=(100, kernel_size)),
             nn.BatchNorm2d(128),
             nn.ReLU6(),
             MaxOverTimePooling(),

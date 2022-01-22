@@ -1,7 +1,8 @@
 import os
 import json
 import nltk
-import util
+from .util import DATA_PAIR_ID_1, DATA_PAIR_ID_2, DATA_OVERALL_SCORE, DATA_BERT_SIM_21, DATA_BERT_SIM_12, \
+    DATA_USE_SIM_21, DATA_USE_SIM_12, DATA_TEXT_CNN_SCORE, embeddings_to_scores
 import pandas as pd
 import torch
 import sentence_transformers
@@ -18,7 +19,8 @@ OUTPUT_CSV_PATH = '../../models/sdr_sbert_document_similarities.csv'
 
 
 # process article title (first) + text to a list of sentences.
-def process_json_to_sentences(path: str, filter_sentence_length: bool = False, min_sentence_len: int = 15, max_sentence_len: int = 1500):
+def process_json_to_sentences(path: str, filter_sentence_length: bool = False, min_sentence_len: int = 15,
+                              max_sentence_len: int = 1500):
     with open(path, 'r') as file:
         article_data = json.load(file)
         title = article_data['title']
@@ -35,13 +37,14 @@ def process_json_to_sentences(path: str, filter_sentence_length: bool = False, m
                     if len(sentence) < max_sentence_len:
                         tmp.append(sentence)
                     else:
-                        tmp.extend([sentence[i:min(i+max_sentence_len, len(sentence))] for i in range(0, len(sentence), max_sentence_len)])
+                        tmp.extend([sentence[i:min(i + max_sentence_len, len(sentence))] for i in
+                                    range(0, len(sentence), max_sentence_len)])
             return tmp
         return res
 
 
 def create_sbert_embeddings(sbert_model: dict, sentences: list, language_1: str, language_2: str):
-    with torch.no_grad():   # avoid changes to the model
+    with torch.no_grad():  # avoid changes to the model
         if language_1 == language_2 and language_1 in sbert_models:
             return sbert_model[language_1].encode(sentences, batch_size=4)
         else:
@@ -49,7 +52,7 @@ def create_sbert_embeddings(sbert_model: dict, sentences: list, language_1: str,
 
 
 def create_universal_sentence_encoder_embeddings(use_model, input_sentences: list, batch_size: int = 50):
-    if len(input_sentences) > batch_size:      # prevent memory error by limiting number of sentences
+    if len(input_sentences) > batch_size:  # prevent memory error by limiting number of sentences
         res = []
         for i in range(0, len(input_sentences), batch_size):
             res.extend(use_model(input_sentences[i:min(i + batch_size, len(input_sentences))]))
@@ -58,27 +61,29 @@ def create_universal_sentence_encoder_embeddings(use_model, input_sentences: lis
         return use_model(input_sentences)
 
 
-def append_output_sample(output_data: dict, pair_id_1: int, pair_id_2: int, ov_score: float, ss_2_1: float, ss_1_2: float, us_2_1: float, us_1_2: float, tcs: float):
-    output_data[util.DATA_PAIR_ID_1].append(pair_id_1)
-    output_data[util.DATA_PAIR_ID_2].append(pair_id_2)
-    output_data[util.DATA_OVERALL_SCORE].append(ov_score)
-    output_data[util.DATA_BERT_SIM_21].append(ss_2_1)
-    output_data[util.DATA_BERT_SIM_12].append(ss_1_2)
-    output_data[util.DATA_USE_SIM_21].append(us_2_1)
-    output_data[util.DATA_USE_SIM_12].append(us_1_2)
-    output_data[util.DATA_TEXT_CNN_SCORE].append(tcs)
+def append_output_sample(output_data: dict, pair_id_1: int, pair_id_2: int, ov_score: float, ss_2_1: float,
+                         ss_1_2: float, us_2_1: float, us_1_2: float, tcs: float):
+    output_data[DATA_PAIR_ID_1].append(pair_id_1)
+    output_data[DATA_PAIR_ID_2].append(pair_id_2)
+    output_data[DATA_OVERALL_SCORE].append(ov_score)
+    output_data[DATA_BERT_SIM_21].append(ss_2_1)
+    output_data[DATA_BERT_SIM_12].append(ss_1_2)
+    output_data[DATA_USE_SIM_21].append(us_2_1)
+    output_data[DATA_USE_SIM_12].append(us_1_2)
+    output_data[DATA_TEXT_CNN_SCORE].append(tcs)
 
 
-def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert_embedding_model: dict, use_embedding_model, is_eval: bool = False):
+def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert_embedding_model: dict,
+                         use_embedding_model, is_eval: bool = False):
     output_data = {
-        util.DATA_PAIR_ID_1: [],
-        util.DATA_PAIR_ID_2: [],
-        util.DATA_OVERALL_SCORE: [],
-        util.DATA_BERT_SIM_21: [],
-        util.DATA_BERT_SIM_12: [],
-        util.DATA_USE_SIM_21: [],
-        util.DATA_USE_SIM_12: [],
-        util.DATA_TEXT_CNN_SCORE: []
+        DATA_PAIR_ID_1: [],
+        DATA_PAIR_ID_2: [],
+        DATA_OVERALL_SCORE: [],
+        DATA_BERT_SIM_21: [],
+        DATA_BERT_SIM_12: [],
+        DATA_USE_SIM_21: [],
+        DATA_USE_SIM_12: [],
+        DATA_TEXT_CNN_SCORE: []
     }
     print("Start reading the data...")
     sentence_pairs = pd.read_csv(data_csv)
@@ -101,8 +106,10 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
                 # score similarities
                 if len(sentences_1) > 0 and len(sentences_2) > 0:
                     # create embeddings
-                    sbert_embeddings_1 = create_sbert_embeddings(sbert_embedding_model, sentences_1, row['url1_lang'], row['url2_lang'])
-                    sbert_embeddings_2 = create_sbert_embeddings(sbert_embedding_model, sentences_2, row['url1_lang'], row['url2_lang'])
+                    sbert_embeddings_1 = create_sbert_embeddings(sbert_embedding_model, sentences_1, row['url1_lang'],
+                                                                 row['url2_lang'])
+                    sbert_embeddings_2 = create_sbert_embeddings(sbert_embedding_model, sentences_2, row['url1_lang'],
+                                                                 row['url2_lang'])
                     use_embeddings_1 = create_universal_sentence_encoder_embeddings(use_embedding_model, sentences_1)
                     use_embeddings_2 = create_universal_sentence_encoder_embeddings(use_embedding_model, sentences_2)
                     assert len(sentences_1) == len(sbert_embeddings_1)
@@ -110,13 +117,16 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
                     assert len(sentences_2) == len(sbert_embeddings_2)
                     assert len(sentences_2) == len(use_embeddings_2)
                     # create scores
-                    sbert_sim_2_to_1, sbert_sim_1_to_2 = util.embeddings_to_scores(sbert_embeddings_1, sbert_embeddings_2, similarity_type='cosine')
-                    use_sim_2_to_1, use_sim_1_to_2 = util.embeddings_to_scores(use_embeddings_1, use_embeddings_2, similarity_type='arccosine')
-                    text_cnn_score =    # TODO: implement felix's model
+                    sbert_sim_2_to_1, sbert_sim_1_to_2 = embeddings_to_scores(sbert_embeddings_1, sbert_embeddings_2,
+                                                                              similarity_type='cosine')
+                    use_sim_2_to_1, use_sim_1_to_2 = embeddings_to_scores(use_embeddings_1, use_embeddings_2,
+                                                                          similarity_type='arccosine')
+                    # text_cnn_score =    # TODO: implement felix's model
                     # append result to output file
                     pair_id_1 = int(pair_ids[0])
                     pair_id_2 = int(pair_ids[1])
-                    append_output_sample(output_data, pair_id_1, pair_id_2, overall_score, sbert_sim_2_to_1, sbert_sim_1_to_2, use_sim_2_to_1, use_sim_1_to_2, text_cnn_score)
+                    append_output_sample(output_data, pair_id_1, pair_id_2, overall_score, sbert_sim_2_to_1,
+                                         sbert_sim_1_to_2, use_sim_2_to_1, use_sim_1_to_2)  # , text_cnn_score)
                     print(f"Processed {index}: #sentences_1: {len(sentences_1)}, #sentences_2: {len(sentences_2)}")
                     del sentences_1, sentences_2, sbert_embeddings_1, sbert_embeddings_2, use_embeddings_1, use_embeddings_2
                 elif is_eval:
@@ -146,5 +156,6 @@ if __name__ == "__main__":
     }
     for model in sbert_models.values():
         model.max_seq_length = 512
-    universal_sentence_encoder_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
+    universal_sentence_encoder_model = hub.load(
+        'https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
     compute_similarities(DATA_DIR, CSV_PATH, OUTPUT_CSV_PATH, sbert_models, universal_sentence_encoder_model)
