@@ -215,10 +215,10 @@ def sentences_2_embedding(sentences, use_model):
 
 
 sbert_models = {  # TODO: implement Dirk's fine-tuned models
-    'default': SentenceTransformer('paraphrase-multilingual-mpnet-base-v2', device='cpu'),
-    'en': SentenceTransformer('all-mpnet-base-v2', device='cpu'),
-    'es': SentenceTransformer('distiluse-base-multilingual-cased-v1', device='cpu'),
-    'fr': SentenceTransformer('sentence-transformers/LaBSE', device='cpu')
+    'default': SentenceTransformer('paraphrase-multilingual-mpnet-base-v2'),
+    'en': SentenceTransformer('all-mpnet-base-v2'),
+    'es': SentenceTransformer('distiluse-base-multilingual-cased-v1'),
+    'fr': SentenceTransformer('sentence-transformers/LaBSE')
 }
 
 
