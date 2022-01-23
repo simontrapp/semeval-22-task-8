@@ -31,7 +31,7 @@ universal_sentence_encoder_model = hub.load('https://tfhub.dev/google/universal-
 
 # STEP 1: create training data for random forest regressor
 compute_similarities('./data/processed/train', './data/semeval-2022_task8_train-data_batch.csv', TRAINING_DATA_CSV_PATH,
-                     sbert_models, universal_sentence_encoder_model, SIM_MATRIX_OUTPUT_FOLDER, max_sentence_len=100)
+                     sbert_models, universal_sentence_encoder_model, SIM_MATRIX_OUTPUT_FOLDER)
 
 # STEP 2: train random forest regressor
 # train_random_forest(TRAINING_DATA_CSV_PATH, '../models/random_forest_test.joblib',

@@ -112,6 +112,8 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
                 sentences_2 = process_json_to_sentences(second_json_path, True)
                 # score similarities
                 if len(sentences_1) > 0 and len(sentences_2) > 0:
+                    if len(sentences_1) > 100 or len(sentences_2) > 100:
+                        continue
                     # create embeddings
                     sbert_embeddings_1 = create_sbert_embeddings(sbert_embedding_model, sentences_1, row['url1_lang'],
                                                                  row['url2_lang'])

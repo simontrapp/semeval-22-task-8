@@ -4,8 +4,8 @@ FROM ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.1
 ARG USER=heinickel
 ARG UID=1308
 
-RUN mkdir -p /home/stud/${USER}/models
-RUN adduser stud${USER} --uid ${UID} --home /home/stud/${USER}/ --disabled-password --gecos "" --no-create-home
+#RUN mkdir -p /home/stud/${USER}/models
+#RUN adduser stud${USER} --uid ${UID} --home /home/stud/${USER}/ --disabled-password --gecos "" --no-create-home
 
 # Build from project root!
 WORKDIR /home/stud/${USER}
