@@ -72,7 +72,7 @@ def append_output_sample(output_data: dict, pair_id_1: int, pair_id_2: int, ov_s
     output_data[DATA_BERT_SIM_12].append(ss_1_2)
     output_data[DATA_USE_SIM_21].append(us_2_1)
     output_data[DATA_USE_SIM_12].append(us_1_2)
-    # output_data[DATA_TEXT_CNN_SCORE].append(tcs)
+    output_data[DATA_TEXT_CNN_SCORE].append(tcs)
 
 
 def save_sim_matrix(use_sim_matrix, sbert_sim_matrix, path: str):
@@ -89,7 +89,8 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
         DATA_BERT_SIM_21: [],
         DATA_BERT_SIM_12: [],
         DATA_USE_SIM_21: [],
-        DATA_USE_SIM_12: []
+        DATA_USE_SIM_12: [],
+        DATA_TEXT_CNN_SCORE: []
     }
     print("Start reading the data...")
     sentence_pairs = pd.read_csv(data_csv)
