@@ -14,6 +14,7 @@ from torch.optim import SGD
 from tqdm import tqdm
 import sys
 import pandas
+import numpy as np
 
 network_name = "sim_cnn_big"
 batch_size = 8
@@ -22,31 +23,32 @@ lr = 0.05
 es_epochs = 50
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-log_path = os.path.join("..", "..", "logs", network_name)
+log_path = os.path.join("models", network_name)
 log_path_tb = os.path.join(log_path, "tb_logs")
-base_path = os.path.join("..", "..", "data")
-data_path = os.path.join(base_path, "processed", "training_data")
-CSV_PATH = os.path.join(base_path, "semeval-2022_task8_train-data_batch.csv")
 
 
 def train_model(training_data_path: str, sim_matrix_folder):
     x, y, pairs = load_data(training_data_path, True)
-
+    pairs = list(zip(map(int, pairs[DATA_PAIR_ID_1]), map(int, pairs[DATA_PAIR_ID_2])))
+    max_X = 0
+    max_Y = 0
     for index, ids in enumerate(pairs):
-        if not os.path.exists(sim_matrix_folder, f"{pairs[0]}_{pairs[1]}.npy"):
-            x.pop(index)
-            y.pop(index)
-            pairs.pop(index)
+        arr = np.load(f"{sim_matrix_folder}/{ids[0]}_{ids[1]}.npy")
+        if arr.shape[1]> max_X:
+            max_X = arr.shape[1]
+        if arr.shape[2]> max_Y:
+            max_Y = arr.shape[2]
 
+    y = list((y-1)/3)
     x_train, x_test, y_train, y_test = train_test_split(pairs, y, test_size=0.2)
-    y_test = (y_test - 1) / 3
+    # y_test = (y_test - 1) / 3
     x_train, x_validation, y_train, y_validation = train_test_split(x_train, y_train, test_size=0.2)
-    y_train = (y_train - 1) / 3
-    y_validation = (y_validation - 1) / 3
+    # y_train = (y_train - 1) / 3
+    # y_validation = (y_validation - 1) / 3
 
-    train_ds = SentenceDataset(x_train, y_train)
-    val_ds = SentenceDataset(x_validation, y_validation)
-    test_ds = SentenceDataset(x_test, y_test)
+    train_ds = SentenceDataset(x_train, y_train, sim_matrix_folder)
+    val_ds = SentenceDataset(x_validation, y_validation, sim_matrix_folder)
+    test_ds = SentenceDataset(x_test, y_test, sim_matrix_folder)
 
     train_dl = DataLoader(train_ds, shuffle=True, batch_size=batch_size, collate_fn=my_collate)
     val_dl = DataLoader(val_ds, shuffle=False, batch_size=batch_size, collate_fn=my_collate)
@@ -56,7 +58,7 @@ def train_model(training_data_path: str, sim_matrix_folder):
 
     loss_fn = nn.MSELoss().to(device)
     network = SimCnn().to(device)
-    summary(network, input_size=(batch_size, 1, 100, 100))
+    summary(network, input_size=(batch_size, 2, 100, 100))
     optimizer = SGD(network.parameters(), lr=lr)
 
     writer = SummaryWriter(os.path.join(log_path, "tb_logs"))

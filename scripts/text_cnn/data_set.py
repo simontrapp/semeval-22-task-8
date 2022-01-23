@@ -24,14 +24,14 @@ class SentenceDataset(Dataset):
         # ms_1 = np.max(matrix, axis=1)
         # x =np.concat([ms_0, ms_1])
         label = self.labels[idx]
-        sim = np.load(f"{self.sim_matrix_path}/{e1[0]}_{e1[1]}")
+        sim = np.load(f"{self.sim_matrix_path}/{e1[0]}_{e1[1]}.npy")
         return torch.Tensor(sim), torch.Tensor([label]).float()
 
 
 def my_collate(batch):
     data = [item[0].numpy() for item in batch]
-    max_w = 100  # max(np.max([x.shape[1] for x in data]),20)
+    max_w = 100
     max_h = max(np.max([x.shape[2] for x in data]),20)
-    data = [np.pad(x, ((0, 0), (0, max_w - x.shape[0]), (0, max_h - x.shape[1]))) for x in data]
+    data = [np.pad(x, ((0, 0), (0, max_w - x.shape[1]), (0, max_h - x.shape[2]))) for x in data]
     target = np.array([item[1].numpy() for item in batch])
     return [torch.Tensor(data), torch.Tensor(target)]

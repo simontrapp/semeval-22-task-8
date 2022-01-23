@@ -13,11 +13,11 @@ from tqdm import tqdm
 import numpy as np
 
 # folder where the web articles were downloaded to
-DATA_DIR = '../../data/processed/train'
+DATA_DIR = 'data/processed/train'
 # the file containing the links for the download script
-CSV_PATH = '../../data/semeval-2022_task8_train-data_batch.csv'
+CSV_PATH = 'data/semeval-2022_task8_train-data_batch.csv'
 # Output file for the similarity scores
-OUTPUT_CSV_PATH = '../../models/sdr_sbert_document_similarities.csv'
+OUTPUT_CSV_PATH = 'models/sdr_sbert_document_similarities.csv'
 
 
 # process article title (first) + text to a list of sentences.
