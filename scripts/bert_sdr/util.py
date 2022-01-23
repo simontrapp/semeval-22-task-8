@@ -65,4 +65,4 @@ def embeddings_to_scores(embeddings_1, embeddings_2, similarity_type: str = 'cos
     else:
         raise NotImplementedError('similarity_type has to be cosine or arccosine!')
     similarity_2_to_1, similarity_1_to_2 = score_similarity_matrix(sim_matrix)
-    return similarity_2_to_1, similarity_1_to_2
+    return similarity_2_to_1, similarity_1_to_2, sim_matrix
