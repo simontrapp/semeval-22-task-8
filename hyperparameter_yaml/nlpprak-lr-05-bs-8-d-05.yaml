@@ -23,8 +23,8 @@ spec:
           resources:
             limits:
               nvidia.com/gpu: "1"
-              cpu: "16"
-              memory: "32Gi"
+              cpu: "8"
+              memory: "16Gi"
           command: ["bash", "-c", "cd /home/stud/heinickel/ && python3 scripts/train_and_evaluate.py 0.5 8 0.5"]
           volumeMounts:
             - mountPath: /home/stud/heinickel/models # directory IN the container
