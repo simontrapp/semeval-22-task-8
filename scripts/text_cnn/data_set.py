@@ -3,6 +3,7 @@ import torch
 from .util import pad_input
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
+from sklearn.impute import KNNImputer, SimpleImputer
 
 
 class SentenceDataset(Dataset):
@@ -13,6 +14,7 @@ class SentenceDataset(Dataset):
         self.labels = label
         self.len = len(dataset)
         self.sim_matrix_path = sim_matrix_path
+        self.imputer = SimpleImputer(strategy='constant', fill_value=0.0)
 
     def __len__(self):
         return self.len
@@ -25,6 +27,8 @@ class SentenceDataset(Dataset):
         # x =np.concat([ms_0, ms_1])
         label = self.labels[idx]
         sim = np.load(f"{self.sim_matrix_path}/{e1[0]}_{e1[1]}.npy")
+        sim = self.imputer.transform(sim)
+        sim = torch.Tensor(sim)
         return torch.Tensor(sim), torch.Tensor([label]).float()
 
 

@@ -30,14 +30,6 @@ log_path_tb = os.path.join(log_path, "tb_logs")
 def train_model(training_data_path: str, sim_matrix_folder):
     x, y, pairs = load_data(training_data_path, True)
     pairs = list(zip(map(int, pairs[DATA_PAIR_ID_1]), map(int, pairs[DATA_PAIR_ID_2])))
-    max_X = 0
-    max_Y = 0
-    for index, ids in enumerate(pairs):
-        arr = np.load(f"{sim_matrix_folder}/{ids[0]}_{ids[1]}.npy")
-        if arr.shape[1]> max_X:
-            max_X = arr.shape[1]
-        if arr.shape[2]> max_Y:
-            max_Y = arr.shape[2]
 
     y = list((y-1)/3)
     x_train, x_test, y_train, y_test = train_test_split(pairs, y, test_size=0.2)

@@ -17,21 +17,21 @@ EVAL_DATA_CSV_PATH = 'models/sdr_sbert_document_similarities_eval.csv'
 EVAL_DATA_CSV_PATH_CNN = 'models/cnn_document_similarities_eval.csv'
 SIM_MATRIX_OUTPUT_FOLDER = 'models/sim_matrix'
 
-nltk.download('punkt')
-sbert_models = {  # TODO: implement Dirk's fine-tuned models
-    'default': sentence_transformers.SentenceTransformer('paraphrase-multilingual-mpnet-base-v2'),
-    'en': sentence_transformers.SentenceTransformer('all-mpnet-base-v2'),
-    'es': sentence_transformers.SentenceTransformer('distiluse-base-multilingual-cased-v1'),
-    'fr': sentence_transformers.SentenceTransformer('sentence-transformers/LaBSE')
-}
-for model in sbert_models.values():
-    model.max_seq_length = 512
-universal_sentence_encoder_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
-# TODO: implement felix's textCNN model (also in calculate_article_similarity.py)
-
-# STEP 1: create training data for random forest regressor
-compute_similarities('./data/processed/train', './data/semeval-2022_task8_train-data_batch.csv', TRAINING_DATA_CSV_PATH,
-                     sbert_models, universal_sentence_encoder_model, SIM_MATRIX_OUTPUT_FOLDER)
+# nltk.download('punkt')
+# sbert_models = {  # TODO: implement Dirk's fine-tuned models
+#     'default': sentence_transformers.SentenceTransformer('paraphrase-multilingual-mpnet-base-v2'),
+#     'en': sentence_transformers.SentenceTransformer('all-mpnet-base-v2'),
+#     'es': sentence_transformers.SentenceTransformer('distiluse-base-multilingual-cased-v1'),
+#     'fr': sentence_transformers.SentenceTransformer('sentence-transformers/LaBSE')
+# }
+# for model in sbert_models.values():
+#     model.max_seq_length = 512
+# universal_sentence_encoder_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
+# # TODO: implement felix's textCNN model (also in calculate_article_similarity.py)
+#
+# # STEP 1: create training data for random forest regressor
+# compute_similarities('./data/processed/train', './data/semeval-2022_task8_train-data_batch.csv', TRAINING_DATA_CSV_PATH,
+#                      sbert_models, universal_sentence_encoder_model, SIM_MATRIX_OUTPUT_FOLDER)
 
 # STEP 2: train random forest regressor
 # train_random_forest(TRAINING_DATA_CSV_PATH, '../models/random_forest_test.joblib',
