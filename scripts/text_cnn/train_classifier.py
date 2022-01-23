@@ -31,6 +31,13 @@ CSV_PATH = os.path.join(base_path, "semeval-2022_task8_train-data_batch.csv")
 
 def train_model(training_data_path: str, sim_matrix_folder):
     x, y, pairs = load_data(training_data_path, True)
+
+    for index, ids in enumerate(pairs):
+        if not os.path.exists(sim_matrix_folder, f"{pairs[0]}_{pairs[1]}.npy"):
+            x.pop(index)
+            y.pop(index)
+            pairs.pop(index)
+
     x_train, x_test, y_train, y_test = train_test_split(pairs, y, test_size=0.2)
     y_test = (y_test - 1) / 3
     x_train, x_validation, y_train, y_validation = train_test_split(x_train, y_train, test_size=0.2)
