@@ -1,0 +1,43 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: nlpprak-lr-01-bs-16-d-05
+  namespace: studheinickel
+spec:
+  template:
+    spec:
+      priorityClassName: research-low
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+                - matchExpressions:
+                  - key: kubernetes.io/hostname
+                    operator: NotIn
+                    values:
+                      - ancalagon
+      containers:
+        - name: nlpprak
+          image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.1
+          imagePullPolicy: "Always"
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+              cpu: "16"
+              memory: "32Gi"
+          command: ["bash", "-c", "cd /home/stud/heinickel/ && python3 scripts/train_and_evaluate.py 0.1 16 0.5"]
+          volumeMounts:
+            - mountPath: /home/stud/heinickel/models # directory IN the container
+              name: localdir # matches volume-name from below
+      imagePullSecrets:
+        - name: lsx-registry
+      restartPolicy: "Never"
+      volumes:
+        - name: localdir
+          cephfs:
+            monitors:
+              - 132.187.14.16,132.187.14.17,132.187.14.19,132.187.14.20  # Not important for you, just copy along
+            user: studheinickel  # <username>
+            path: "/home/stud/heinickel/mlnlp/models" # <full path to dir in CEPH>
+            secretRef: # The name of the secret for auth. Is always "ceph-secret"
+              name: ceph-secret

@@ -1,7 +1,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: nlpprak
+  name: nlpprak-lr-00005-bs-16-d-05
   namespace: studheinickel
 spec:
   template:
@@ -25,7 +25,7 @@ spec:
               nvidia.com/gpu: "1"
               cpu: "16"
               memory: "32Gi"
-          command: ["bash", "-c", "cd /home/stud/heinickel/ && python3 scripts/train_and_evaluate.py 0.05 8 0.5"]
+          command: ["bash", "-c", "cd /home/stud/heinickel/ && python3 scripts/train_and_evaluate.py 0.0005 16 0.5"]
           volumeMounts:
             - mountPath: /home/stud/heinickel/models # directory IN the container
               name: localdir # matches volume-name from below
