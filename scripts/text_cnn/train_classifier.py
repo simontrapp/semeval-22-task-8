@@ -29,10 +29,13 @@ data_path = os.path.join(base_path, "processed", "training_data")
 CSV_PATH = os.path.join(base_path, "semeval-2022_task8_train-data_batch.csv")
 
 
-def train_model(training_data_path: str):
-    x, y, _ = load_data(training_data_path, True)
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+def train_model(training_data_path: str, sim_matrix_folder):
+    x, y, pairs = load_data(training_data_path, True)
+    x_train, x_test, y_train, y_test = train_test_split(pairs, y, test_size=0.2)
+    y_test = (y_test - 1) / 3
     x_train, x_validation, y_train, y_validation = train_test_split(x_train, y_train, test_size=0.2)
+    y_train = (y_train - 1) / 3
+    y_validation = (y_validation - 1) / 3
 
     train_ds = SentenceDataset(x_train, y_train)
     val_ds = SentenceDataset(x_validation, y_validation)
@@ -101,7 +104,7 @@ def predict_scores(model_path: str, test_data_path: str, output_path: str):
     data_loader = DataLoader(data_set, shuffle=True, batch_size=batch_size, collate_fn=my_collate)
 
     pred = []
-    for batch_index, (X, y) in enumerate(pbar:=tqdm(data_loader, file=sys.stdout)):
+    for batch_index, (X, y) in enumerate(pbar := tqdm(data_loader, file=sys.stdout)):
         pbar.set_description("Predict scores")
         X = X.to(device)
         pred.extend(network(X).detach())

@@ -7,11 +7,12 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 class SentenceDataset(Dataset):
 
-    def __init__(self, dataset, label):
+    def __init__(self, dataset, label, sim_matrix_path:str):
         super(SentenceDataset, self).__init__()
         self.dataset = dataset
         self.labels = label
         self.len = len(dataset)
+        self.sim_matrix_path = sim_matrix_path
 
     def __len__(self):
         return self.len
@@ -23,7 +24,8 @@ class SentenceDataset(Dataset):
         # ms_1 = np.max(matrix, axis=1)
         # x =np.concat([ms_0, ms_1])
         label = self.labels[idx]
-        return torch.Tensor(e1), torch.Tensor([label]).float()
+        sim = np.load(f"{self.sim_matrix_path}/{e1[0]}_{e1[1]}")
+        return torch.Tensor(sim), torch.Tensor([label]).float()
 
 
 def my_collate(batch):

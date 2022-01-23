@@ -89,8 +89,7 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
         DATA_BERT_SIM_21: [],
         DATA_BERT_SIM_12: [],
         DATA_USE_SIM_21: [],
-        DATA_USE_SIM_12: [],
-        DATA_TEXT_CNN_SCORE: []
+        DATA_USE_SIM_12: []
     }
     print("Start reading the data...")
     sentence_pairs = pd.read_csv(data_csv)
