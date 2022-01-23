@@ -16,22 +16,22 @@ import sys
 import pandas
 import numpy as np
 
-network_name = "sim_cnn_big"
-batch_size = 8
+# network_name = "sim_cnn_big"
+# batch_size = 8
 epochs = 1000
-lr = 0.05
-es_epochs = 50
+# lr = 0.05
+es_epochs = 20
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
-log_path = os.path.join("models", network_name)
-log_path_tb = os.path.join(log_path, "tb_logs")
 
+def train_model(training_data_path: str, sim_matrix_folder: str, name: str, lr: float, batch_size: int, dropout: float):
+    log_path = os.path.join("models", name)
+    log_path_tb = os.path.join(log_path, "tb_logs")
 
-def train_model(training_data_path: str, sim_matrix_folder):
     x, y, pairs = load_data(training_data_path, True)
     pairs = list(zip(map(int, pairs[DATA_PAIR_ID_1]), map(int, pairs[DATA_PAIR_ID_2])))
 
-    y = list((y-1)/3)
+    y = list((y - 1) / 3)
     x_train, x_test, y_train, y_test = train_test_split(pairs, y, test_size=0.2)
     # y_test = (y_test - 1) / 3
     x_train, x_validation, y_train, y_validation = train_test_split(x_train, y_train, test_size=0.2)
@@ -49,7 +49,7 @@ def train_model(training_data_path: str, sim_matrix_folder):
     print("Start training model!")
 
     loss_fn = nn.MSELoss().to(device)
-    network = SimCnn().to(device)
+    network = SimCnn(dropout=dropout).to(device)
     summary(network, input_size=(batch_size, 2, 100, 100))
     optimizer = SGD(network.parameters(), lr=lr)
 
@@ -79,7 +79,10 @@ def train_model(training_data_path: str, sim_matrix_folder):
 
     print(f"Finished training model! Best loss was {best_metric} at epoch index {best_index}")
     print("Start testing...")
-    validate(network, device, train_dl, save_predictions=True, ids=None,
+    network.load_state_dict(torch.load(os.path.join(log_path, f"epoch_{best_index}")))
+    network.to(device)
+
+    validate(network, device, train_dl, save_predictions=False, ids=None,
              result_path=os.path.join(log_path, "predictions_train.csv"),
              pbar_description="Test network with train data set")
     validate(network, device, val_dl, save_predictions=False, ids=None,
@@ -87,8 +90,6 @@ def train_model(training_data_path: str, sim_matrix_folder):
              pbar_description="Test network with validation data set")
 
     network = SimCnn(loss_fn, device=device)
-    network.load_state_dict(torch.load(os.path.join(log_path, f"epoch_{best_index}")))
-    network.to(device)
     validate(network, device, test_dl, save_predictions=False, ids=None,
              result_path=os.path.join(log_path, "predictions_test.csv"),
              pbar_description="Test network with test data set")
@@ -97,7 +98,7 @@ def train_model(training_data_path: str, sim_matrix_folder):
     print("Done!")
 
 
-def predict_scores(model_path: str, test_data_path: str, output_path: str):
+def predict_scores(model_path: str, test_data_path: str, output_path: str, batch_size: int):
     network = load_model(model_path)
     x, y, pairs = load_data(test_data_path)
 

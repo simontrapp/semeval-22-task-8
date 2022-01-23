@@ -6,6 +6,7 @@ import nltk
 import sentence_transformers
 import tensorflow_hub as hub
 import tensorflow as tf
+import sys
 
 gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.5)
 sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
@@ -38,8 +39,12 @@ SIM_MATRIX_OUTPUT_FOLDER = 'models/sim_matrix'
 #                    True)  # train and evaluate on test set (create visualization/data for paper)
 # train_random_forest(TRAINING_DATA_CSV_PATH, RANDOM_FOREST_FILE,
 #                    False)  # use the whole data for training the random forest
-
-train_model(TRAINING_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER)
+args = sys.argv[1:]
+lr = args[0]
+batch_size = args[1]
+dropout = args[2]
+name = f"nlpprak_lr_{lr}_bs_{batch_size}_dropout_{args[2]}"
+train_model(TRAINING_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER, name, lr, batch_size, dropout)
 
 # STEP 3: process evaluation data
 # compute_similarities('../data/processed/eval', '../data/semeval-2022_task8_eval_data_202201.csv', EVAL_DATA_CSV_PATH,
@@ -47,4 +52,4 @@ train_model(TRAINING_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER)
 
 # STEP 4: predict similarity scores of evaluation data
 # predict_scores(RANDOM_FOREST_FILE, EVAL_DATA_CSV_PATH, '../models/predictions.csv')
-# predict_scores_cnn(RANDOM_FOREST_FILE, EVAL_DATA_CSV_PATH_CNN, '../models/predictions_cnn.csv')
+# predict_scores_cnn(RANDOM_FOREST_FILE, EVAL_DATA_CSV_PATH_CNN, '../models/predictions_cnn.csv', batch_size)
