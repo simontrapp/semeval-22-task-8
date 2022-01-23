@@ -12,10 +12,10 @@ sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_opti
 
 
 # STEP 0: initialize environment
-TRAINING_DATA_CSV_PATH = '../models/sdr_sbert_document_similarities.csv'
-RANDOM_FOREST_FILE = '../models/random_forest_evaluation.joblib'
-EVAL_DATA_CSV_PATH = '../models/sdr_sbert_document_similarities_eval.csv'
-EVAL_DATA_CSV_PATH_CNN = '../models/cnn_document_similarities_eval.csv'
+TRAINING_DATA_CSV_PATH = './models/sdr_sbert_document_similarities.csv'
+RANDOM_FOREST_FILE = './models/random_forest_evaluation.joblib'
+EVAL_DATA_CSV_PATH = './models/sdr_sbert_document_similarities_eval.csv'
+EVAL_DATA_CSV_PATH_CNN = './models/cnn_document_similarities_eval.csv'
 
 nltk.download('punkt')
 sbert_models = {  # TODO: implement Dirk's fine-tuned models
@@ -30,7 +30,7 @@ universal_sentence_encoder_model = hub.load('https://tfhub.dev/google/universal-
 # TODO: implement felix's textCNN model (also in calculate_article_similarity.py)
 
 # STEP 1: create training data for random forest regressor
-compute_similarities('../data/processed/train', '../data/semeval-2022_task8_train-data_batch.csv', TRAINING_DATA_CSV_PATH,
+compute_similarities('./data/processed/train', './data/semeval-2022_task8_train-data_batch.csv', TRAINING_DATA_CSV_PATH,
                      sbert_models, universal_sentence_encoder_model)
 
 # STEP 2: train random forest regressor
