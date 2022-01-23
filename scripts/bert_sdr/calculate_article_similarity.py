@@ -77,7 +77,7 @@ def append_output_sample(output_data: dict, pair_id_1: int, pair_id_2: int, ov_s
 
 def save_sim_matrix(use_sim_matrix, sbert_sim_matrix, path: str):
     arr = np.array([sbert_sim_matrix, use_sim_matrix], dtype='float32')
-    np.save(arr, path)
+    np.save(path, arr)
 
 
 def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert_embedding_model: dict,
