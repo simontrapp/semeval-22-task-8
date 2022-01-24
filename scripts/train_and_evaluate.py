@@ -40,9 +40,9 @@ SIM_MATRIX_OUTPUT_FOLDER = 'models/sim_matrix'
 # train_random_forest(TRAINING_DATA_CSV_PATH, RANDOM_FOREST_FILE,
 #                    False)  # use the whole data for training the random forest
 args = sys.argv[1:]
-lr = args[0]
-batch_size = args[1]
-dropout = args[2]
+lr = float(args[0])
+batch_size = int(args[1])
+dropout = float(args[2])
 name = f"nlpprak_lr_{lr}_bs_{batch_size}_dropout_{args[2]}"
 train_model(TRAINING_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER, name, lr, batch_size, dropout)
 
