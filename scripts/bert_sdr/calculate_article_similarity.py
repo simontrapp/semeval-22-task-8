@@ -82,7 +82,7 @@ def save_sim_matrix(use_sim_matrix, sbert_sim_matrix, path: str):
 
 
 def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert_embedding_model: dict,
-                         use_embedding_model, text_cnn: torch.Module, is_eval: bool = False):
+                         use_embedding_model, text_cnn: torch.nn.Module, is_eval: bool = False):
     output_data = {
         DATA_PAIR_ID_1: [],
         DATA_PAIR_ID_2: [],
@@ -113,8 +113,10 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
                 sentences_2 = process_json_to_sentences(second_json_path, True)
                 # score similarities
                 if len(sentences_1) > 0 and len(sentences_2) > 0:
-                    if len(sentences_1) > 100 or len(sentences_2) > 100:
-                        continue
+                    if len(sentences_1) > 100:
+                        sentences_1 = sentences_1[:99]
+                    if len(sentences_2) > 100:
+                        sentences_2 = sentences_2[:99]
                     # create embeddings
                     sbert_embeddings_1 = create_sbert_embeddings(sbert_embedding_model, sentences_1, row['url1_lang'],
                                                                  row['url2_lang'])

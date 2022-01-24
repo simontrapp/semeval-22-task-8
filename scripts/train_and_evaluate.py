@@ -39,6 +39,7 @@ compute_similarities('./data/processed/train', './data/semeval-2022_task8_train-
                      sbert_models, universal_sentence_encoder_model, text_cnn)
 
 # STEP 2: train random forest regressor
+print("start training random forest ...")
 train_random_forest(TRAINING_DATA_CSV_PATH, '../models/random_forest_test.joblib',
                    True)  # train and evaluate on test set (create visualization/data for paper)
 train_random_forest(TRAINING_DATA_CSV_PATH, RANDOM_FOREST_FILE,

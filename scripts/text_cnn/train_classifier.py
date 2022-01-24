@@ -96,7 +96,7 @@ def train_model(training_data_path: str, sim_matrix_folder: str, name: str, lr: 
     print("Done!")
 
 
-def predict_score(network: torch.Module, x: torch.Tensor):
+def predict_score(network: torch.nn.Module, x: torch.Tensor):
     with torch.no_grad():
         x = torch.unsqueeze(x, 0)
         network.eval()
