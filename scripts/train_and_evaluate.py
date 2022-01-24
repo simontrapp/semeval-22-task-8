@@ -12,11 +12,10 @@ gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.5)
 sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
 
 # STEP 0: initialize environment
-TRAINING_DATA_CSV_PATH = 'models/sdr_sbert_document_similarities.csv'
-RANDOM_FOREST_FILE = 'models/random_forest_evaluation.joblib'
-EVAL_DATA_CSV_PATH = 'models/sdr_sbert_document_similarities_eval.csv'
-EVAL_DATA_CSV_PATH_CNN = 'models/cnn_document_similarities_eval.csv'
-SIM_MATRIX_OUTPUT_FOLDER = 'models/sim_matrix_train'
+TRAINING_DATA_CSV_PATH = 'models/sdr_sbert_document_similarities_final.csv'
+RANDOM_FOREST_FILE = 'models/random_forest_evaluation_final.joblib'
+EVAL_DATA_CSV_PATH = 'models/sdr_sbert_document_similarities_eval_final.csv'
+EVAL_DATA_CSV_PATH_CNN = 'models/cnn_document_similarities_eval_final.csv'
 SIM_MATRIX_OUTPUT_FOLDER = 'models/sim_matrix_train'
 CNN_MODEL_PATH = 'models/text_cnn_final'
 

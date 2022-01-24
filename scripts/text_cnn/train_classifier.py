@@ -11,7 +11,7 @@ from torch import nn
 from torchinfo import summary
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim import SGD
-from util import unnormalize_scores
+from text_cnn.util import unnormalize_scores
 from tqdm import tqdm
 import sys
 import pandas
