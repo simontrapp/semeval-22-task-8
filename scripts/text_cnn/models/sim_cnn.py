@@ -51,9 +51,9 @@ class SimCnnSubPart(nn.Module):
     def __init__(self, kernel_size: int, dropout: float):
         super(SimCnnSubPart, self).__init__()
         self.network_1 = nn.Sequential(
-            CnnBlock(in_channels=2, out_channels=32, kernel_size=kernel_size, dropout=dropout / 2),
+            CnnBlock(in_channels=2, out_channels=32, kernel_size=kernel_size, dropout=(dropout / 2.0)),
             nn.Dropout(dropout / 2),
-            CnnBlock(in_channels=32, out_channels=64, kernel_size=kernel_size, dropout=dropout / 2),
+            CnnBlock(in_channels=32, out_channels=64, kernel_size=kernel_size, dropout=(dropout / 2.0)),
             nn.Conv2d(in_channels=64, out_channels=128, kernel_size=(100, kernel_size)),
             nn.BatchNorm2d(128),
             nn.ReLU6(),
@@ -76,15 +76,22 @@ class CnnBlock(nn.Module):
 
         self.c1 = nn.Sequential(
             nn.Conv2d(in_channels=in_channels, out_channels=out_channels, kernel_size=kernel_size, padding='same'),
-            nn.BatchNorm2d(out_channels),
             nn.ReLU6(),
+            nn.BatchNorm2d(out_channels),
             nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=kernel_size, padding='same'),
-            nn.BatchNorm2d(out_channels),
             nn.ReLU6(),
+            nn.BatchNorm2d(out_channels),
             nn.Dropout(dropout),
             nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=kernel_size, padding='same'),
+            nn.ReLU6(),
             nn.BatchNorm2d(out_channels),
-            nn.ReLU6()
+            nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=kernel_size, padding='same'),
+            nn.ReLU6(),
+            nn.BatchNorm2d(out_channels),
+            nn.Dropout(dropout),
+            nn.Conv2d(in_channels=out_channels, out_channels=out_channels, kernel_size=kernel_size, padding='same'),
+            nn.ReLU6(),
+            nn.BatchNorm2d(out_channels)
         )
 
     def forward(self, x):
