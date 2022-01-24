@@ -1,7 +1,7 @@
 kubapiVersion: batch/v1
 kind: Job
 metadata:
-  name: nlpprak
+  name: nlpprak-final
   namespace: studheinickel
 spec:
   template:
@@ -18,7 +18,7 @@ spec:
                       - ancalagon
       containers:
         - name: nlpprak
-          image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.1
+          image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.2
           imagePullPolicy: "Always"
           resources:
             limits:

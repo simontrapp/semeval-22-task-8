@@ -13,7 +13,7 @@ set -e
 #   ./docker_run.sh
 
 export BUILDAH_FORMAT="docker"
-export NAME="ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.1"
+export NAME="ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.2"
 alias buildah='buildah --runroot /tmp/$USER/.local/share/containers/runroot --root /tmp/$USER/.local/share/containers/storage/'
 
 echo "Building the container..."
@@ -25,6 +25,5 @@ buildah push ${NAME}
 
 # RUN ONCE: kubectl -n studtrapp create secret generic lsx-registry --from-file=.dockerconfigjson=${XDG_RUNTIME_DIR}/containers/auth.json --type=kubernetes.io/dockerconfigjson
 
-kubectl -n studheinickel create -f hyperparameter_yaml/
-
+kubectl -n studheinickel create -f docker_run_felix.yaml
 # TO DELETE: kubectl -n studtrapp delete -f scripts/bert_sdr/docker_run.yaml
