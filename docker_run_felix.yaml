@@ -1,4 +1,4 @@
-apiVersion: batch/v1
+kubapiVersion: batch/v1
 kind: Job
 metadata:
   name: nlpprak

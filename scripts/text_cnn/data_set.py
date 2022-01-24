@@ -8,7 +8,7 @@ from sklearn.impute import KNNImputer, SimpleImputer
 
 class SentenceDataset(Dataset):
 
-    def __init__(self, dataset, label, sim_matrix_path:str):
+    def __init__(self, dataset, label, sim_matrix_path: str):
         super(SentenceDataset, self).__init__()
         self.dataset = dataset
         self.labels = label
@@ -34,8 +34,13 @@ class SentenceDataset(Dataset):
 
 def my_collate(batch):
     data = [item[0].numpy() for item in batch]
-    max_w = 100
-    max_h = max(np.max([x.shape[2] for x in data]),20)
-    data = [np.pad(x, ((0, 0), (0, max_w - x.shape[1]), (0, max_h - x.shape[2]))) for x in data]
+    data = pad_data(data)
     target = np.array([item[1].numpy() for item in batch])
-    return [torch.Tensor(data), torch.Tensor(target)]
+    return [data, torch.Tensor(target)]
+
+
+def pad_data(data):
+    max_w = 100
+    max_h = max(np.max([x.shape[2] for x in data]), 20)
+    data = [np.pad(x, ((0, 0), (0, max_w - x.shape[1]), (0, max_h - x.shape[2]))) for x in data]
+    return torch.Tensor(data)

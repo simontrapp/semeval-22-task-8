@@ -1,5 +1,5 @@
 from bert_sdr.util import load_data, DATA_PAIR_ID_1, DATA_PAIR_ID_2
-from .data_set import SentenceDataset, my_collate
+from .data_set import SentenceDataset, my_collate, pad_data
 from .models.sim_cnn import SimCnn
 from .train import train, validate
 
@@ -11,6 +11,7 @@ from torch import nn
 from torchinfo import summary
 from torch.utils.tensorboard import SummaryWriter
 from torch.optim import SGD
+from util import unnormalize_scores
 from tqdm import tqdm
 import sys
 import pandas
@@ -95,25 +96,14 @@ def train_model(training_data_path: str, sim_matrix_folder: str, name: str, lr: 
     print("Done!")
 
 
-def predict_scores(model_path: str, test_data_path: str, output_path: str, batch_size: int):
-    network = load_model(model_path, dropout=0.0)
-    x, y, pairs = load_data(test_data_path)
-
-    data_set = SentenceDataset(x, y)
-    data_loader = DataLoader(data_set, shuffle=True, batch_size=batch_size, collate_fn=my_collate)
-
-    pred = []
-    for batch_index, (X, y) in enumerate(pbar := tqdm(data_loader, file=sys.stdout)):
-        pbar.set_description("Predict scores")
-        X = X.to(device)
-        pred.extend(network(X).detach())
-    predictions = network.predict(x)
-    out_data = pandas.DataFrame(
-        pairs[DATA_PAIR_ID_1].combine(pairs[DATA_PAIR_ID_2], lambda p1, p2: f"{int(p1)}_{int(p2)}"))
-    out_data['prediction'] = predictions
-    # noinspection PyTypeChecker
-    out_data.to_csv(output_path, header=['pair_id', 'Overall'], index=False)
-    # write_metrics_to_file(output_path, y, predictions)
+def predict_score(network: torch.Module, x: torch.Tensor):
+    with torch.no_grad():
+        x = torch.unsqueeze(x, 0)
+        network.eval()
+        network.to(device)
+        x.to(device)
+        y = network(pad_data(x)).detach().cpu()
+        return unnormalize_scores(y)[0]
 
 
 def load_model(model_path: str, dropout: float):
