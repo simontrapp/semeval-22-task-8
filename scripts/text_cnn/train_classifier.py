@@ -79,7 +79,7 @@ def train_model(training_data_path: str, sim_matrix_folder: str, name: str, lr: 
 
     print(f"Finished training model! Best loss was {best_metric} at epoch index {best_index}")
     print("Start testing...")
-    network = load_model(os.path.join(log_path, f"epoch_{best_index}"))
+    network = load_model(os.path.join(log_path, f"epoch_{best_index}"), dropout=dropout)
 
     validate(network, device, train_dl, save_predictions=False, ids=None,
              result_path=os.path.join(log_path, "predictions_train.csv"),
@@ -96,7 +96,7 @@ def train_model(training_data_path: str, sim_matrix_folder: str, name: str, lr: 
 
 
 def predict_scores(model_path: str, test_data_path: str, output_path: str, batch_size: int):
-    network = load_model(model_path)
+    network = load_model(model_path, dropout=0.0)
     x, y, pairs = load_data(test_data_path)
 
     data_set = SentenceDataset(x, y)
@@ -116,7 +116,7 @@ def predict_scores(model_path: str, test_data_path: str, output_path: str, batch
     # write_metrics_to_file(output_path, y, predictions)
 
 
-def load_model(model_path: str):
-    network = SimCnn()
+def load_model(model_path: str, dropout: float):
+    network = SimCnn(dropout)
     network.load_state_dict(torch.load(model_path))
     return network.to(device)
