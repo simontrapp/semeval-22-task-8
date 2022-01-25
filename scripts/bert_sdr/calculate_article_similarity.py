@@ -99,7 +99,10 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
     try:
         for index, row in tqdm(sentence_pairs.iterrows()):
             pair_id = row['pair_id']
-            overall_score = row['Overall']
+            if is_eval:
+                overall_score = None
+            else:
+                overall_score = row['Overall']
             pair_ids = pair_id.split('_')
             if len(pair_ids) != 2:
                 raise ValueError('ID Pair doesnt contain 2 IDs!')

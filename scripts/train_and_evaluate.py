@@ -39,11 +39,11 @@ text_cnn = load_model(CNN_MODEL_PATH, 0.0)
 #                     sbert_models, universal_sentence_encoder_model, text_cnn)
 
 # STEP 2: train random forest regressor
-print("start training random forest ...")
-train_random_forest(TRAINING_DATA_CSV_PATH, 'models/random_forest_test.joblib',
-                   True)  # train and evaluate on test set (create visualization/data for paper)
-train_random_forest(TRAINING_DATA_CSV_PATH, RANDOM_FOREST_FILE,
-                   False)  # use the whole data for training the random forest
+# print("start training random forest ...")
+# train_random_forest(TRAINING_DATA_CSV_PATH, 'models/random_forest_test.joblib',
+#                    True)  # train and evaluate on test set (create visualization/data for paper)
+# train_random_forest(TRAINING_DATA_CSV_PATH, RANDOM_FOREST_FILE,
+#                    False)  # use the whole data for training the random forest
 # args = sys.argv[1:]
 # lr = float(args[0])
 # batch_size = int(args[1])
