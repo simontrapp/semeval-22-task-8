@@ -53,7 +53,7 @@ text_cnn = load_model(CNN_MODEL_PATH, 0.0)
 
 # STEP 3: process evaluation data
 compute_similarities('data/processed/eval', 'data/semeval-2022_task8_eval_data_202201.csv', EVAL_DATA_CSV_PATH,
-                    sbert_models, universal_sentence_encoder_model, True)
+                    sbert_models, universal_sentence_encoder_model, text_cnn, True)
 
 # STEP 4: predict similarity scores of evaluation data
 predict_scores(RANDOM_FOREST_FILE, EVAL_DATA_CSV_PATH, 'models/predictions.csv')
