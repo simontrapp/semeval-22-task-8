@@ -98,10 +98,9 @@ def train_model(training_data_path: str, sim_matrix_folder: str, name: str, lr: 
 
 def predict_score(network: torch.nn.Module, x: torch.Tensor):
     with torch.no_grad():
-        x = torch.unsqueeze(x, 0)
+        x = torch.unsqueeze(x, 0).to(device)
         network.eval()
         network.to(device)
-        x.to(device)
         y = network(pad_data(x)).detach().cpu()
         return unnormalize_scores(y)[0]
 
