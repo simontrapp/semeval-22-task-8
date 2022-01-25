@@ -35,12 +35,12 @@ universal_sentence_encoder_model = hub.load('https://tfhub.dev/google/universal-
 text_cnn = load_model(CNN_MODEL_PATH, 0.0)
 
 # # STEP 1: create training data for random forest regressor
-compute_similarities('./data/processed/train', './data/semeval-2022_task8_train-data_batch.csv', TRAINING_DATA_CSV_PATH,
-                     sbert_models, universal_sentence_encoder_model, text_cnn)
+#compute_similarities('./data/processed/train', './data/semeval-2022_task8_train-data_batch.csv', TRAINING_DATA_CSV_PATH,
+#                     sbert_models, universal_sentence_encoder_model, text_cnn)
 
 # STEP 2: train random forest regressor
 print("start training random forest ...")
-train_random_forest(TRAINING_DATA_CSV_PATH, '../models/random_forest_test.joblib',
+train_random_forest(TRAINING_DATA_CSV_PATH, 'models/random_forest_test.joblib',
                    True)  # train and evaluate on test set (create visualization/data for paper)
 train_random_forest(TRAINING_DATA_CSV_PATH, RANDOM_FOREST_FILE,
                    False)  # use the whole data for training the random forest
@@ -52,8 +52,8 @@ train_random_forest(TRAINING_DATA_CSV_PATH, RANDOM_FOREST_FILE,
 # train_model(TRAINING_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER, name, lr, batch_size, dropout)
 
 # STEP 3: process evaluation data
-compute_similarities('../data/processed/eval', '../data/semeval-2022_task8_eval_data_202201.csv', EVAL_DATA_CSV_PATH,
+compute_similarities('data/processed/eval', 'data/semeval-2022_task8_eval_data_202201.csv', EVAL_DATA_CSV_PATH,
                     sbert_models, universal_sentence_encoder_model, True)
 
 # STEP 4: predict similarity scores of evaluation data
-predict_scores(RANDOM_FOREST_FILE, EVAL_DATA_CSV_PATH, '../models/predictions.csv')
+predict_scores(RANDOM_FOREST_FILE, EVAL_DATA_CSV_PATH, 'models/predictions.csv')
