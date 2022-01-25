@@ -98,7 +98,7 @@ def train_model(training_data_path: str, sim_matrix_folder: str, name: str, lr: 
 
 def predict_score(network: torch.nn.Module, x: torch.Tensor):
     with torch.no_grad():
-        x = pad_data(torch.unsqueeze(x, 0))[0].to(device)
+        x = pad_data(torch.unsqueeze(x, 0)).to(device)
         network.eval()
         network.to(device)
         y = network(x).detach().cpu()
@@ -107,5 +107,5 @@ def predict_score(network: torch.nn.Module, x: torch.Tensor):
 
 def load_model(model_path: str, dropout: float):
     network = SimCnn(dropout)
-    network.load_state_dict(torch.load(model_path))
+    network.load_state_dict(torch.load(model_path, map_location=torch.device('cpu')))
     return network.to(device)
