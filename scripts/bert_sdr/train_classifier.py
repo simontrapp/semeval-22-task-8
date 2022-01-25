@@ -1,6 +1,6 @@
 import pandas
 from .util import load_data, write_metrics_to_file, DATA_PAIR_ID_1, DATA_PAIR_ID_2
-from .calculate_article_similarity import OUTPUT_CSV_PATH
+# from calculate_article_similarity import OUTPUT_CSV_PATH
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import KNNImputer, SimpleImputer
@@ -27,8 +27,6 @@ def plot_model(y_labels, y_predictions, pdf_path: str):
     plt.legend()
     plt.tight_layout()
     plt.savefig(pdf_path)
-
-
 
 
 def train_random_forest(training_data_path: str, model_path: str, create_test_set: bool = False):
@@ -61,10 +59,10 @@ def predict_scores(model_path: str, test_data_path: str, output_path: str):
     write_metrics_to_file(output_path, y, predictions)
 
 
-if __name__ == "__main__":
-    # train and evaluate on test set
-    train_random_forest(OUTPUT_CSV_PATH, '../../models/random_forest_kw_zero.joblib', True)
-    # use the whole data for training the random forest
-    train_random_forest(OUTPUT_CSV_PATH, '../../models/random_forest_no_test_kw_zero.joblib', False)
-    # EXAMPLE: predict with a pretrained random forest model on a preprocessed test set (change later accordingly!)
-    predict_scores('../../models/random_forest_no_test_kw_zero.joblib', OUTPUT_CSV_PATH, '../../models/predictions.csv')
+#if __name__ == "__main__":
+#    # train and evaluate on test set
+#    train_random_forest(OUTPUT_CSV_PATH, '../../models/random_forest_kw_zero.joblib', True)
+#    # use the whole data for training the random forest
+#    train_random_forest(OUTPUT_CSV_PATH, '../../models/random_forest_no_test_kw_zero.joblib', False)
+#    # EXAMPLE: predict with a pretrained random forest model on a preprocessed test set (change later accordingly!)
+#    predict_scores('../../models/random_forest_no_test_kw_zero.joblib', OUTPUT_CSV_PATH, '../../models/predictions.csv')

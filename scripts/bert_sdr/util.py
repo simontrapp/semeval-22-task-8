@@ -24,7 +24,7 @@ def load_data(data_path: str, knn_imputer: bool = False):
     else:
         imputer = SimpleImputer(strategy='constant', fill_value=0.0)
     preprocessed_data = pandas.DataFrame(imputer.fit_transform(preprocessed_data), columns=preprocessed_data.columns)
-    x = preprocessed_data[[DATA_BERT_SIM_21, DATA_BERT_SIM_12, DATA_USE_SIM_21, DATA_USE_SIM_12]]
+    x = preprocessed_data[[DATA_BERT_SIM_21, DATA_BERT_SIM_12, DATA_USE_SIM_21, DATA_USE_SIM_12, DATA_TEXT_CNN_SCORE]]
     y = preprocessed_data[DATA_OVERALL_SCORE]
     pairs = preprocessed_data[[DATA_PAIR_ID_1, DATA_PAIR_ID_2]]
     return x, y, pairs
