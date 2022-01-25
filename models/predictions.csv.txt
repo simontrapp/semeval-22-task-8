@@ -1,0 +1,3 @@
+Mean squared error: 6.205274350570329
+Mean absolute error: 2.3255688071042404
+Pearson correlation coefficient (r, p-value): (nan, nan)
