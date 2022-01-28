@@ -43,8 +43,8 @@ def train_model(training_data_path: str, sim_matrix_folder_train: str, validatio
     # y_train = (y_train - 1) / 3
     # y_validation = (y_validation - 1) / 3
 
-    train_ds = SentenceDataset(x_train, y_train, sim_matrix_folder_train)
-    val_ds = SentenceDataset(x_validation, y_validation, sim_matrix_folder_validation)
+    train_ds = SentenceDataset(pairs_train, y_train, sim_matrix_folder_train)
+    val_ds = SentenceDataset(pairs_validation, y_validation, sim_matrix_folder_validation)
     # test_ds = SentenceDataset(x_test, y_test, sim_matrix_folder)
 
     train_dl = DataLoader(train_ds, shuffle=True, batch_size=batch_size, collate_fn=my_collate)

@@ -22,28 +22,28 @@ SIM_MATRIX_OUTPUT_FOLDER_VALIDATION = 'models/sim_matrix_validation'
 # CNN_MODEL_PATH = 'models/text_cnn_final'
 
 # nltk.download('punkt')
-sbert_models = {
-    'default': SentenceTransformer('models/sbert/paramulti160-overall'),
-    # SentenceTransformer('paraphrase-multilingual-mpnet-base-v2'),
-    'en': SentenceTransformer('models/sbert/allmpnet160-overall'),  # SentenceTransformer('all-mpnet-base-v2'),
-    'es': SentenceTransformer('models/sbert/distilmulti160-overall'),
-    # SentenceTransformer('distiluse-base-multilingual-cased-v1'),
-    'fr': SentenceTransformer('sentence-transformers/LaBSE')
-}
+# sbert_models = {
+#     'default': SentenceTransformer('models/sbert/paramulti160-overall'),
+#     # SentenceTransformer('paraphrase-multilingual-mpnet-base-v2'),
+#     'en': SentenceTransformer('models/sbert/allmpnet160-overall'),  # SentenceTransformer('all-mpnet-base-v2'),
+#     'es': SentenceTransformer('models/sbert/distilmulti160-overall'),
+#     # SentenceTransformer('distiluse-base-multilingual-cased-v1'),
+#     'fr': SentenceTransformer('sentence-transformers/LaBSE')
+# }
 # for model in sbert_models.values():
 #     model.max_seq_length = 512
-universal_sentence_encoder_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
+# universal_sentence_encoder_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
 
 # text_cnn = load_model(CNN_MODEL_PATH, 0.0)
 
 # # STEP 1: create training data for random forest regressor
-compute_similarities('./data/processed/train', './data/split/train.csv', TRAINING_DATA_CSV_PATH,
-                     sbert_models, universal_sentence_encoder_model, None, SIM_MATRIX_OUTPUT_FOLDER_TRAIN) #text_cnn)
+# compute_similarities('./data/processed/train', './data/split/train.csv', TRAINING_DATA_CSV_PATH,
+#                      sbert_models, universal_sentence_encoder_model, None, SIM_MATRIX_OUTPUT_FOLDER_TRAIN) #text_cnn)
 
 
 # create validation data
-compute_similarities('./data/processed/train', './data/split/test.csv', VALIDATION_DATA_CSV_PATH,
-                     sbert_models, universal_sentence_encoder_model, None, SIM_MATRIX_OUTPUT_FOLDER_VALIDATION) #text_cnn)
+# compute_similarities('./data/processed/train', './data/split/test.csv', VALIDATION_DATA_CSV_PATH,
+#                      sbert_models, universal_sentence_encoder_model, None, SIM_MATRIX_OUTPUT_FOLDER_VALIDATION) #text_cnn)
 
 # STEP 2: train random forest regressor
 # print("start training random forest ...")
