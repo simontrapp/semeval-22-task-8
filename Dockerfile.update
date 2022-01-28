@@ -1,4 +1,4 @@
-FROM ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.2
+FROM ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.1
 
 # config
 ARG USER=heinickel
