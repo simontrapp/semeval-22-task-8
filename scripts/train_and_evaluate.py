@@ -53,8 +53,8 @@ SIM_MATRIX_OUTPUT_FOLDER_VALIDATION = 'models/sim_matrix_validation'
 #                     False)  # use the whole data for training the random forest
 args = sys.argv[1:]
 lr = float(args[0])
-name = f"nlpprak_lr_{lr}"
-train_model(TRAINING_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER_TRAIN, VALIDATION_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER_VALIDATION, 'nlpprak-final', lr, 8, 0.5)
+name = f"nlpprak-final-{lr}"
+train_model(TRAINING_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER_TRAIN, VALIDATION_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER_VALIDATION, name, lr, 8, 0.5)
 
 # STEP 3: process evaluation data
 # compute_similarities('data/processed/eval', 'data/semeval-2022_task8_eval_data_202201.csv', EVAL_DATA_CSV_PATH,
