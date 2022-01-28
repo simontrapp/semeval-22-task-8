@@ -83,7 +83,8 @@ def save_sim_matrix(use_sim_matrix, sbert_sim_matrix, path: str):
 
 def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert_embedding_model: dict,
                          use_embedding_model, text_cnn: torch.nn.Module, similarity_matrix_path:str, is_eval: bool = False):
-    os.makedirs(similarity_matrix_path)
+    if not os.path.exists(similarity_matrix_path):
+        os.makedirs(similarity_matrix_path)
     output_data = {
         DATA_PAIR_ID_1: [],
         DATA_PAIR_ID_2: [],
