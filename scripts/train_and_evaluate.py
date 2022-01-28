@@ -6,7 +6,7 @@ import nltk
 from sentence_transformers import SentenceTransformer
 import tensorflow_hub as hub
 import tensorflow as tf
-# import sys
+import sys
 
 gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.5)
 sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
@@ -51,8 +51,10 @@ SIM_MATRIX_OUTPUT_FOLDER_VALIDATION = 'models/sim_matrix_validation'
 #                     True)  # train and evaluate on test set (create visualization/data for paper)
 # train_random_forest(TRAINING_DATA_CSV_PATH, RANDOM_FOREST_FILE,
 #                     False)  # use the whole data for training the random forest
-
-train_model(TRAINING_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER_TRAIN, VALIDATION_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER_VALIDATION, 'nlpprak-final', 0.05, 8, 0.5)
+args = sys.argv[1:]
+lr = float(args[0])
+name = f"nlpprak_lr_{lr}"
+train_model(TRAINING_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER_TRAIN, VALIDATION_DATA_CSV_PATH, SIM_MATRIX_OUTPUT_FOLDER_VALIDATION, 'nlpprak-final', lr, 8, 0.5)
 
 # STEP 3: process evaluation data
 # compute_similarities('data/processed/eval', 'data/semeval-2022_task8_eval_data_202201.csv', EVAL_DATA_CSV_PATH,

@@ -25,6 +25,6 @@ buildah push ${NAME}
 
 # RUN ONCE: kubectl -n studtrapp create secret generic lsx-registry --from-file=.dockerconfigjson=${XDG_RUNTIME_DIR}/containers/auth.json --type=kubernetes.io/dockerconfigjson
 
-kubectl -n studtrapp create -f docker_run.yaml
+kubectl -n studtrapp create -f yamls/
 
 # TO DELETE: kubectl -n studtrapp delete -f scripts/bert_sdr/docker_run.yaml
