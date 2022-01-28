@@ -2,14 +2,14 @@ from bert_sdr.calculate_article_similarity import compute_similarities
 # from bert_sdr.train_classifier import train_random_forest, predict_scores
 from text_cnn.train_classifier import train_model, load_model
 
-import nltk
-from sentence_transformers import SentenceTransformer
-import tensorflow_hub as hub
-import tensorflow as tf
+# import nltk
+# from sentence_transformers import SentenceTransformer
+# import tensorflow_hub as hub
+# import tensorflow as tf
 import sys
 
-gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.5)
-sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
+# gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.5)
+# sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
 
 # STEP 0: initialize environment
 TRAINING_DATA_CSV_PATH = 'models/sdr_sbert_document_similarities_training.csv'
