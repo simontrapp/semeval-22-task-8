@@ -1,7 +1,7 @@
 kubapiVersion: batch/v1
 kind: Job
 metadata:
-  name: nlpprak-final
+  name: nlpprak
   namespace: studheinickel
 spec:
   template:
@@ -11,14 +11,16 @@ spec:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
             nodeSelectorTerms:
-                - matchExpressions:
-                  - key: kubernetes.io/hostname
-                    operator: NotIn
+              - matchExpressions:
+                  - key: gputype
+                    operator: In
                     values:
-                      - ancalagon
+                      - rtx8000
+                      - titan
+                      #- rtx2080ti
       containers:
         - name: nlpprak
-          image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.2
+          image: ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.1
           imagePullPolicy: "Always"
           resources:
             limits:

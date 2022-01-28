@@ -13,11 +13,11 @@ set -e
 #   ./docker_run.sh
 
 export BUILDAH_FORMAT="docker"
-export NAME="ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.2"
+export NAME="ls6-stud-registry.informatik.uni-wuerzburg.de/studheinickel/nlpprak:0.0.1"
 alias buildah='buildah --runroot /tmp/$USER/.local/share/containers/runroot --root /tmp/$USER/.local/share/containers/storage/'
 
 echo "Building the container..."
-buildah bud -t ${NAME} -f Dockerfile.update .
+buildah bud -t ${NAME} -f Dockerfile .
 echo "Login to container registry. Username: stud, Password: studregistry."
 buildah login ls6-stud-registry.informatik.uni-wuerzburg.de   # with username `stud` and password `studregistry`
 echo "Pushing container to registry..."
