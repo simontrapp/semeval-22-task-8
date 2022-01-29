@@ -1,0 +1,3 @@
+Mean squared error: 0.710809184661806
+Mean absolute error: 0.650345957288388
+Pearson correlation coefficient (r, p-value): (0.6853441591545157, 2.550046292685885e-66)
