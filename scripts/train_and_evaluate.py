@@ -13,7 +13,7 @@ import pandas as pd
 gpu_options = tf.compat.v1.GPUOptions(per_process_gpu_memory_fraction=0.5)
 sess = tf.compat.v1.Session(config=tf.compat.v1.ConfigProto(gpu_options=gpu_options))
 
-folder = 'ft-cnn-round'
+folder = 'final'
 if not os.path.exists(f'models/{folder}'):
     os.makedirs(f'models/{folder}')
 # STEP 0: initialize environment
@@ -66,11 +66,11 @@ text_cnn = load_model(CNN_MODEL_PATH, 0.0)
 
 # STEP 2: train random forest regressor
 # print("start training random forest ...")
-# train_random_forest(TRAINING_DATA_CSV_PATH_WITH_CNN, f'models/{folder}/random_forest_test.joblib',
-#                     False)  # train and evaluate on test set (create visualization/data for paper)
+train_random_forest(TRAINING_DATA_CSV_PATH_WITH_CNN, f'models/{folder}/random_forest_test.joblib',
+                    False)  # train and evaluate on test set (create visualization/data for paper)
 # train_random_forest(TRAINING_DATA_CSV_PATH, RANDOM_FOREST_FILE,
 #                     False)  # use the whole data for training the random forest
-# predict_scores(f'models/ft-cnn/random_forest_test.joblib', VALIDATION_DATA_CSV_PATH_WITH_CNN, f'models/{folder}/predictions-validation.csv')
+predict_scores(f'models/{folder}/random_forest_test.joblib', VALIDATION_DATA_CSV_PATH_WITH_CNN, f'models/{folder}/predictions-validation.csv')
 
 # args = sys.argv[1:]
 # lr = float(args[0])
@@ -82,4 +82,4 @@ compute_similarities('data/processed/eval', 'data/semeval-2022_task8_eval_data_2
                      sbert_models, universal_sentence_encoder_model, text_cnn, SIM_MATRIX_OUTPUT_FOLDER_EVAL, True)
 
 # STEP 4: predict similarity scores of evaluation data
-predict_scores(RANDOM_FOREST_FILE, EVAL_DATA_CSV_PATH, 'models/predictions.csv')
+predict_scores(f'models/{folder}/random_forest_test.joblib', EVAL_DATA_CSV_PATH, f'models/{folder}/predictions-eval.csv')

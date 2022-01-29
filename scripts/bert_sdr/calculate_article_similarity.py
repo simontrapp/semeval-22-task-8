@@ -142,13 +142,13 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
                     use_sim_2_to_1, use_sim_1_to_2, use_sim_matrix = embeddings_to_scores(use_embeddings_1,
                                                                                           use_embeddings_2,
                                                                                           similarity_type='arccosine')
-                    # text_cnn_input = torch.Tensor([sbert_sim_matrix, use_sim_matrix])
-                    # text_cnn_score = predict_score(text_cnn, text_cnn_input)  # TODO: implement felix's model
+                    text_cnn_input = torch.Tensor([sbert_sim_matrix, use_sim_matrix])
+                    text_cnn_score = predict_score(text_cnn, text_cnn_input)  # TODO: implement felix's model
                     # append result to output file
                     pair_id_1 = int(pair_ids[0])
                     pair_id_2 = int(pair_ids[1])
                     append_output_sample(output_data, pair_id_1, pair_id_2, overall_score, sbert_sim_2_to_1,
-                                         sbert_sim_1_to_2, use_sim_2_to_1, use_sim_1_to_2)
+                                         sbert_sim_1_to_2, use_sim_2_to_1, use_sim_1_to_2, text_cnn_score)
                     save_sim_matrix(use_sim_matrix, sbert_sim_matrix, f"{similarity_matrix_path}/{pair_id}")
                     # print(f"Processed {index}: #sentences_1: {len(sentences_1)}, #sentences_2: {len(sentences_2)}")
                     del sentences_1, sentences_2, sbert_embeddings_1, sbert_embeddings_2, use_embeddings_1, use_embeddings_2
