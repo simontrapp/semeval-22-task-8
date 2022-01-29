@@ -25,9 +25,9 @@ class SentenceDataset(Dataset):
         # ms_0 = np.max(matrix, axis=0)
         # ms_1 = np.max(matrix, axis=1)
         # x =np.concat([ms_0, ms_1])
-        label = self.labels[idx]
         sim = np.load(f"{self.sim_matrix_path}/{e1[0]}_{e1[1]}.npy")
         sim = [self.imputer.fit_transform(x) for x in sim]
+        label = self.labels[idx]
         sim = torch.Tensor(sim)
         return torch.Tensor(sim), torch.Tensor([label]).float()
 

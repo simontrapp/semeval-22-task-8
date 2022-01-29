@@ -6,6 +6,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.impute import KNNImputer, SimpleImputer
 import joblib
 import matplotlib.pyplot as plt
+from text_cnn.util import round_to_nearest
 
 
 # load model from .joblib file
@@ -51,6 +52,7 @@ def predict_scores(model_path: str, test_data_path: str, output_path: str):
     rf_model = load_model(model_path)
     x, y, pairs = load_data(test_data_path)
     predictions = rf_model.predict(x)
+    predictions = [round_to_nearest(pred) for pred in predictions]
     out_data = pandas.DataFrame(
         pairs[DATA_PAIR_ID_1].combine(pairs[DATA_PAIR_ID_2], lambda p1, p2: f"{int(p1)}_{int(p2)}"))
     out_data['prediction'] = predictions
@@ -58,8 +60,7 @@ def predict_scores(model_path: str, test_data_path: str, output_path: str):
     out_data.to_csv(output_path, header=['pair_id', 'Overall'], index=False)
     write_metrics_to_file(output_path, y, predictions)
 
-
-#if __name__ == "__main__":
+# if __name__ == "__main__":
 #    # train and evaluate on test set
 #    train_random_forest(OUTPUT_CSV_PATH, '../../models/random_forest_kw_zero.joblib', True)
 #    # use the whole data for training the random forest

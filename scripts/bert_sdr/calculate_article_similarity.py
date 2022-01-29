@@ -12,6 +12,7 @@ from tensorflow_text import SentencepieceTokenizer
 from tqdm import tqdm
 import numpy as np
 from text_cnn.train_classifier import predict_score
+from sklearn.impute import KNNImputer, SimpleImputer
 
 # folder where the web articles were downloaded to
 DATA_DIR = 'data/processed/train'
@@ -82,7 +83,8 @@ def save_sim_matrix(use_sim_matrix, sbert_sim_matrix, path: str):
 
 
 def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert_embedding_model: dict,
-                         use_embedding_model, text_cnn: torch.nn.Module, similarity_matrix_path:str, is_eval: bool = False):
+                         use_embedding_model, text_cnn: torch.nn.Module, similarity_matrix_path: str,
+                         is_eval: bool = False):
     if not os.path.exists(similarity_matrix_path):
         os.makedirs(similarity_matrix_path)
     output_data = {
@@ -165,6 +167,47 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
         result_df = pd.DataFrame(output_data)
         # noinspection PyTypeChecker
         result_df.to_csv(output_csv, index=False, na_rep='NULL')
+
+
+def add_cnn_score(data_csv: str, output_csv, predictions_output_csv, text_cnn: torch.nn.Module, similarity_matrix_path: str,
+                  is_eval: bool = False):
+    # os.makedirs(similarity_matrix_path)
+    print("Start reading the data...")
+    sentence_pairs = pd.read_csv(data_csv)
+    predictions = {
+        'pair_id': [],
+        'Overall': []
+    }
+
+    # noinspection PyBroadException
+    try:
+        imputer = SimpleImputer(strategy='constant', fill_value=0.0)
+        for index, row in tqdm(sentence_pairs.iterrows()):
+            pair_id_1 = int(row[DATA_PAIR_ID_1])
+            pair_id_2 = int(row[DATA_PAIR_ID_2])
+
+            sim = np.load(f"{similarity_matrix_path}/{pair_id_1}_{pair_id_2}.npy")
+            sim = [imputer.fit_transform(x) for x in sim]
+            sim = torch.Tensor(sim)
+
+            text_cnn_score = predict_score(text_cnn, sim).numpy()[0]
+
+            row[DATA_TEXT_CNN_SCORE] = text_cnn_score
+
+            predictions['pair_id'].append(f'{pair_id_1}_{pair_id_2}')
+            predictions['Overall'].append(text_cnn_score)
+    except AssertionError as e:
+        print(f"Error: {e}")
+    except Exception as e:
+        print(f"Error occurred! Saving results...\n Exception: {e}")
+    finally:
+        # save results as csv
+        # noinspection PyTypeChecker
+        sentence_pairs.to_csv(output_csv, index=False, na_rep='NULL')
+
+        result_df = pd.DataFrame(predictions)
+        # noinspection PyTypeChecker
+        result_df.to_csv(predictions_output_csv, index=False, na_rep='NULL')
 
 
 if __name__ == "__main__":

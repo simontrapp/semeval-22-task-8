@@ -106,7 +106,7 @@ def predict_score(network: torch.nn.Module, x: torch.Tensor):
         network.eval()
         network.to(device)
         y = network(x).detach().cpu()
-        return unnormalize_scores(y)[0]
+        return [score * 3 + 1 for score in y][0]
 
 
 def load_model(model_path: str, dropout: float):
