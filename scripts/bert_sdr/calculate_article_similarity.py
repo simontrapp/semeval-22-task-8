@@ -146,7 +146,7 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
 
                     x = [imputer.fit_transform(x_part) for x_part in [sbert_sim_matrix, use_sim_matrix]]
                     text_cnn_input = torch.Tensor(x)
-                    text_cnn_score = predict_score(text_cnn, text_cnn_input)  # TODO: implement felix's model
+                    text_cnn_score = predict_score(text_cnn, text_cnn_input).numpy()[0]
                     # append result to output file
                     pair_id_1 = int(pair_ids[0])
                     pair_id_2 = int(pair_ids[1])
