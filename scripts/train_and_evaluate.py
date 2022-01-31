@@ -6,7 +6,7 @@ import nltk
 from sentence_transformers import SentenceTransformer
 import tensorflow_hub as hub
 import tensorflow as tf
-import sys
+# import sys
 import os
 import pandas as pd
 
@@ -41,7 +41,7 @@ sbert_models = {
 # for model in sbert_models.values():
 #     model.max_seq_length = 512
 universal_sentence_encoder_model = hub.load('https://tfhub.dev/google/universal-sentence-encoder-multilingual-large/3')
-
+#
 text_cnn = load_model(CNN_MODEL_PATH, 0.0)
 # #
 # sentence_pairs = pd.read_csv(VALIDATION_DATA_CSV_PATH)
@@ -83,3 +83,10 @@ compute_similarities('data/processed/eval', 'data/semeval-2022_task8_eval_data_2
 
 # STEP 4: predict similarity scores of evaluation data
 predict_scores(f'models/{folder}/random_forest_test.joblib', EVAL_DATA_CSV_PATH, f'models/{folder}/predictions-eval.csv')
+
+sentence_pairs = pd.read_csv(EVAL_DATA_CSV_PATH)
+# predictions = pd.read_csv('models/cnn_pred/predictions_cnn_validation.csv')
+out_data = pd.DataFrame(
+        sentence_pairs['pair_id_1'].combine(sentence_pairs['pair_id_2'], lambda p1, p2: f"{int(p1)}_{int(p2)}"))
+out_data['Overall'] = sentence_pairs['text_cnn_score']
+out_data.to_csv(f'models/{folder}/predictions-eval-cnn.csv', header=['pair_id', 'Overall'], index=False, na_rep='NULL')

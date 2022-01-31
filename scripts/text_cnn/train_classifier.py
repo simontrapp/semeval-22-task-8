@@ -16,6 +16,8 @@ from text_cnn.util import unnormalize_scores
 # import sys
 # import pandas
 # import numpy as np
+from sklearn.impute import SimpleImputer
+
 
 # network_name = "sim_cnn_big"
 # batch_size = 8
@@ -101,6 +103,8 @@ def train_model(training_data_path: str, sim_matrix_folder_train: str, validatio
 
 
 def predict_score(network: torch.nn.Module, x: torch.Tensor):
+    imputer = SimpleImputer(strategy='constant', fill_value=0.0)
+    x = [imputer.fit_transform(x_part) for x_part in x]
     with torch.no_grad():
         x = pad_data(torch.unsqueeze(x, 0)).to(device)
         network.eval()

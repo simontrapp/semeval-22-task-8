@@ -52,7 +52,7 @@ def predict_scores(model_path: str, test_data_path: str, output_path: str):
     rf_model = load_model(model_path)
     x, y, pairs = load_data(test_data_path)
     predictions = rf_model.predict(x)
-    predictions = [round_to_nearest(pred) for pred in predictions]
+    # predictions = [round_to_nearest(pred) for pred in predictions]
     out_data = pandas.DataFrame(
         pairs[DATA_PAIR_ID_1].combine(pairs[DATA_PAIR_ID_2], lambda p1, p2: f"{int(p1)}_{int(p2)}"))
     out_data['prediction'] = predictions

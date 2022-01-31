@@ -29,7 +29,7 @@ class SentenceDataset(Dataset):
         sim = [self.imputer.fit_transform(x) for x in sim]
         label = self.labels[idx]
         sim = torch.Tensor(sim)
-        return torch.Tensor(sim), torch.Tensor([label]).float()
+        return sim, torch.Tensor([label]).float()
 
 
 def my_collate(batch):
