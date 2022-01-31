@@ -85,6 +85,7 @@ def save_sim_matrix(use_sim_matrix, sbert_sim_matrix, path: str):
 def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert_embedding_model: dict,
                          use_embedding_model, text_cnn: torch.nn.Module, similarity_matrix_path: str,
                          is_eval: bool = False):
+    imputer = SimpleImputer(strategy='constant', fill_value=0.0)
     if not os.path.exists(similarity_matrix_path):
         os.makedirs(similarity_matrix_path)
     output_data = {
@@ -142,7 +143,9 @@ def compute_similarities(data_folder: str, data_csv: str, output_csv: str, sbert
                     use_sim_2_to_1, use_sim_1_to_2, use_sim_matrix = embeddings_to_scores(use_embeddings_1,
                                                                                           use_embeddings_2,
                                                                                           similarity_type='arccosine')
-                    text_cnn_input = torch.Tensor([sbert_sim_matrix, use_sim_matrix])
+
+                    x = [imputer.fit_transform(x_part) for x_part in [sbert_sim_matrix, use_sim_matrix]]
+                    text_cnn_input = torch.Tensor(x)
                     text_cnn_score = predict_score(text_cnn, text_cnn_input)  # TODO: implement felix's model
                     # append result to output file
                     pair_id_1 = int(pair_ids[0])
