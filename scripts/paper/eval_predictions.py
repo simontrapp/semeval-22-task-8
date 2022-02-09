@@ -13,6 +13,7 @@ def calculate_pearson(reference_csv: str, predictions_csv: str):
 print('10% split:   ----------------------------------------')
 print(f"CNN only:           {calculate_pearson('../../data/split/test.csv', '../../models/cnn_pred/predictions_cnn_validation.csv')}")
 print(f"+ Random Forest:    {calculate_pearson('../../data/split/test.csv', '../../models/ft-cnn/predictions-validation.csv')}")
+print(f"+ Publishing Date:  {calculate_pearson('../../data/split/test.csv', '../traineval/predictions-validation_ft-cnn-combined_time2.csv')}")
 print('-----------------------------------------------------')
 
 # on eval set
@@ -38,6 +39,7 @@ def calculate_performance_per_language(reference_csv: str, predictions_csv: str,
 # 10% train split
 lang_10_cnn = calculate_performance_per_language('../../data/split/test.csv', '../../models/cnn_pred/predictions_cnn_validation.csv', '10 TextCNN')
 lang_10_rf = calculate_performance_per_language('../../data/split/test.csv', '../../models/ft-cnn/predictions-validation.csv', '10 Random Forest')
+lang_10_pd = calculate_performance_per_language('../../data/split/test.csv', '../traineval/predictions-validation_ft-cnn-combined_time2.csv', '10 Publish Date')
 
 # eval set
 lang_eval_cnn = calculate_performance_per_language('../../data/final_evaluation_data.csv', '../../models/final_predictions-cnn.csv', 'Eval TextCNN')
@@ -45,5 +47,5 @@ lang_eval_rf = calculate_performance_per_language('../../data/final_evaluation_d
 lang_eval_pd = calculate_performance_per_language('../../data/final_evaluation_data.csv', '../eval_score/predictions-rf-combined_time.csv', 'Eval Publish Date')
 
 # append to final latex table
-final_lang_table = lang_10_cnn.append(lang_10_rf).append(lang_eval_cnn).append(lang_eval_rf).append(lang_eval_pd)
+final_lang_table = lang_10_cnn.append(lang_10_rf).append(lang_10_pd).append(lang_eval_cnn).append(lang_eval_rf).append(lang_eval_pd)
 print(final_lang_table.to_latex(na_rep=''))
